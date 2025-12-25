@@ -92,7 +92,9 @@
             
             const resultArea = this.elements.resultArea;
             let shouldScrollBottom = false;
-            if (resultArea) {
+            
+            // Only auto-scroll to bottom during streaming
+            if (resultArea && isStreaming) {
                 const threshold = 50;
                 const distanceToBottom = resultArea.scrollHeight - resultArea.scrollTop - resultArea.clientHeight;
                 shouldScrollBottom = distanceToBottom <= threshold;
@@ -111,8 +113,15 @@
                 if (this.elements.windowFooter) this.elements.windowFooter.classList.add('hidden');
             }
 
-            if (resultArea && shouldScrollBottom) {
-                resultArea.scrollTop = resultArea.scrollHeight;
+            if (resultArea) {
+                if (isStreaming) {
+                    if (shouldScrollBottom) {
+                        resultArea.scrollTop = resultArea.scrollHeight;
+                    }
+                } else {
+                    // Finished: Scroll to top
+                    resultArea.scrollTop = 0;
+                }
             }
         }
 

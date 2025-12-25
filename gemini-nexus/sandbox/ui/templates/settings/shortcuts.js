@@ -15,6 +15,11 @@ export const ShortcutsSettingsTemplate = `
     </div>
 
     <div class="shortcut-row">
+        <label data-i18n="shortcutBrowserControl">Open Browser Control</label>
+        <input type="text" id="shortcut-browser-control" class="shortcut-input" readonly value="Ctrl+B">
+    </div>
+
+    <div class="shortcut-row">
         <label data-i18n="shortcutFocusInput">Focus Input</label>
         <input type="text" class="shortcut-input" readonly value="Ctrl+P">
     </div>

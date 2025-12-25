@@ -59,8 +59,15 @@ export class AppController {
         sendToBackground({ action: "CHECK_PAGE_CONTEXT" });
     }
 
-    toggleBrowserControl() {
-        this.browserControlActive = !this.browserControlActive;
+    toggleBrowserControl(forceState = null) {
+        // If forceState is provided, match it. Otherwise toggle.
+        if (forceState !== null) {
+            if (this.browserControlActive === forceState) return;
+            this.browserControlActive = forceState;
+        } else {
+            this.browserControlActive = !this.browserControlActive;
+        }
+
         const btn = document.getElementById('browser-control-btn');
         if (btn) {
             btn.classList.toggle('active', this.browserControlActive);
@@ -189,6 +196,11 @@ export class AppController {
         if (action === 'BACKGROUND_MESSAGE') {
             if (payload.action === 'SWITCH_SESSION') {
                 this.switchToSession(payload.sessionId);
+                return;
+            }
+            if (payload.action === 'ACTIVATE_BROWSER_CONTROL') {
+                this.toggleBrowserControl(true);
+                if(this.ui.inputFn) this.ui.inputFn.focus();
                 return;
             }
             // Tab list response

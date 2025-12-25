@@ -1,4 +1,3 @@
-
 // lib/utils.js
 
 // Extract authentication token from HTML
@@ -42,16 +41,11 @@ export function getHighResImageUrl(url) {
     let base = parts[0];
     const query = parts.slice(1).join('?');
 
-    // Check for existing parameters in the path (e.g. =s1024, =w500)
-    const lastSlash = base.lastIndexOf('/');
-    const lastEquals = base.lastIndexOf('=');
+    // Remove any existing sizing parameters from the path (e.g., =w500-h500, =s1024)
+    // The regex matches typical Google User Content URL parameter patterns at the end of the path
+    base = base.replace(/=[a-zA-Z0-9_-]+$/, '');
 
-    if (lastEquals > lastSlash) {
-        // Strip existing parameter
-        base = base.substring(0, lastEquals);
-    }
-
-    // Append high-res parameter (=s0)
+    // Append high-res parameter (=s0 for original size)
     base += "=s0";
 
     return base + (query ? '?' + query : '');

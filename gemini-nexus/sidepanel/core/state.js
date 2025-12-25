@@ -14,6 +14,7 @@ export class StateManager {
         chrome.storage.local.get([
             'geminiSessions', 
             'pendingSessionId', 
+            'pendingMode', // Fetch pending mode (e.g. browser_control)
             'geminiShortcuts',
             'geminiModel',
             'pendingImage',
@@ -107,7 +108,17 @@ export class StateManager {
             delete this.data.pendingImage;
         }
 
-        // 4. LocalStorage Sync (Theme/Lang)
+        // 4. Pending Actions (Browser Control Mode)
+        if (this.data.pendingMode === 'browser_control') {
+            this.frame.postMessage({
+                action: 'BACKGROUND_MESSAGE',
+                payload: { action: 'ACTIVATE_BROWSER_CONTROL' }
+            });
+            chrome.storage.local.remove('pendingMode');
+            delete this.data.pendingMode;
+        }
+
+        // 5. LocalStorage Sync (Theme/Lang)
         const cachedTheme = localStorage.getItem('geminiTheme') || 'system';
         const cachedLang = localStorage.getItem('geminiLanguage') || 'system';
         

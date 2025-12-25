@@ -15,7 +15,7 @@ class ToolbarActions {
      * Handles Image Prompts (Screenshot, OCR, Analysis)
      * @param {string} imgBase64 - Image Data URL
      * @param {object} rect - Display Position
-     * @param {string} mode - 'ocr' | 'translate' | 'snip' | 'analyze' | 'upscale' | 'expand' | 'remove_text' | 'remove_bg'
+     * @param {string} mode - 'ocr' | 'translate' | 'snip' | 'analyze' | 'upscale' | 'expand' | 'remove_text' | 'remove_bg' | 'remove_watermark'
      * @param {string} model - Model Name
      */
     async handleImagePrompt(imgBase64, rect, mode, model = "gemini-2.5-flash") {
@@ -64,6 +64,12 @@ class ToolbarActions {
                 prompt = t.prompts.removeBg;
                 loadingMsg = t.loading.removeBg;
                 inputVal = t.inputs.removeBg;
+                break;
+            case 'remove_watermark':
+                title = t.titles.removeWatermark;
+                prompt = t.prompts.removeWatermark;
+                loadingMsg = t.loading.removeWatermark;
+                inputVal = t.inputs.removeWatermark;
                 break;
             case 'snip': // Fallback / Generic Snip
             default:

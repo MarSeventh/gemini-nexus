@@ -1,6 +1,4 @@
 
-
-
 // content/toolbar/controller.js
 
 (function() {
@@ -62,16 +60,40 @@
                 }
             });
 
-            // Restore floating model preference
-            chrome.storage.local.get(['gemini_floating_model'], (result) => {
-                if (result.gemini_floating_model) {
-                    this.ui.setSelectedModel(result.gemini_floating_model);
+            // Sync Settings (Model & Provider) with Global State
+            this.syncSettings();
+            
+            // Listen for global setting changes to keep toolbar in sync
+            chrome.storage.onChanged.addListener((changes, area) => {
+                if (area === 'local') {
+                    const keys = ['geminiModel', 'geminiProvider', 'geminiUseOfficialApi', 'geminiOpenaiModel'];
+                    if (keys.some(k => changes[k])) {
+                        this.syncSettings();
+                    }
                 }
             });
 
             // Initialize Modules
             this.imageDetector.init();
             this.streamHandler.init();
+        }
+        
+        async syncSettings() {
+            const result = await chrome.storage.local.get([
+                'geminiModel', 
+                'geminiProvider', 
+                'geminiUseOfficialApi', 
+                'geminiOpenaiModel'
+            ]);
+            
+            const settings = {
+                provider: result.geminiProvider,
+                useOfficialApi: result.geminiUseOfficialApi,
+                openaiModel: result.geminiOpenaiModel
+            };
+            
+            // Update UI options and selection
+            this.ui.updateModelList(settings, result.geminiModel);
         }
         
         setSelectionEnabled(enabled) {
@@ -204,8 +226,8 @@
         // --- Action Dispatcher ---
 
         handleModelChange(model) {
-            // Save preference specifically for the floating window
-            chrome.storage.local.set({ 'gemini_floating_model': model });
+            // Update Global Preference
+            chrome.storage.local.set({ 'geminiModel': model });
         }
 
         handleAction(actionType, data) {

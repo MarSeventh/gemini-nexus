@@ -95,6 +95,13 @@ export class UIMessageHandler {
             return true; 
         }
 
+        if (request.action === "TOGGLE_SIDE_PANEL_CONTROL") {
+            this._handleToggleSidePanelControl(request, sender).finally(() => {
+                 sendResponse({ status: "processed" });
+            });
+            return true;
+        }
+
         if (request.action === "INITIATE_CAPTURE") {
             (async () => {
                 const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
@@ -228,21 +235,71 @@ export class UIMessageHandler {
             const openPromise = chrome.sidePanel.open({ tabId: sender.tab.id, windowId: sender.tab.windowId })
                 .catch(err => console.error("Could not open side panel:", err));
 
-            if (request.sessionId) {
-                await chrome.storage.local.set({ pendingSessionId: request.sessionId });
-                setTimeout(() => chrome.storage.local.remove('pendingSessionId'), 5000);
+            const updateOps = {};
+            if (request.sessionId) updateOps.pendingSessionId = request.sessionId;
+            if (request.mode) updateOps.pendingMode = request.mode;
+
+            if (Object.keys(updateOps).length > 0) {
+                await chrome.storage.local.set(updateOps);
+                // Clear pending items after a timeout to prevent stale actions
+                setTimeout(() => {
+                    const keys = Object.keys(updateOps);
+                    chrome.storage.local.remove(keys);
+                }, 5000);
             }
 
             try { await openPromise; } catch (e) {}
 
-            if (request.sessionId) {
-                setTimeout(() => {
+            // If immediate execution needed after open (panel might already be open)
+            setTimeout(() => {
+                if (request.sessionId) {
                     chrome.runtime.sendMessage({
                         action: "SWITCH_SESSION",
                         sessionId: request.sessionId
                     }).catch(() => {});
-                }, 500);
+                }
+                if (request.mode === 'browser_control') {
+                    chrome.runtime.sendMessage({
+                        action: "ACTIVATE_BROWSER_CONTROL"
+                    }).catch(() => {});
+                }
+            }, 500);
+        }
+    }
+
+    async _handleToggleSidePanelControl(request, sender) {
+        if (!sender.tab) return;
+        
+        const tabId = sender.tab.id;
+        const currentLock = this.controlManager ? this.controlManager.getTargetTabId() : null;
+        
+        // Is Browser Control active for this tab?
+        const isControlActive = (currentLock === tabId);
+        
+        if (isControlActive) {
+            // --- TOGGLE OFF ---
+            
+            // 1. Disable Control (Detach debugger)
+            if (this.controlManager) {
+                await this.controlManager.disableControl();
             }
+            
+            // 2. Close Side Panel (Workaround: disable then enable)
+            try {
+                // This effectively closes the side panel for this tab
+                await chrome.sidePanel.setOptions({ tabId, enabled: false });
+                
+                // Re-enable it quickly so it can be opened again later
+                setTimeout(() => {
+                    chrome.sidePanel.setOptions({ tabId, enabled: true, path: 'sidepanel/index.html' });
+                }, 250); 
+            } catch (e) {
+                console.error("Failed to toggle side panel close:", e);
+            }
+            
+        } else {
+            // --- TOGGLE ON ---
+            await this._handleOpenSidePanel({ ...request, mode: 'browser_control' }, sender);
         }
     }
 }

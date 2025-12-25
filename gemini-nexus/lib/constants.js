@@ -3,7 +3,8 @@
 
 export const DEFAULT_SHORTCUTS = {
     quickAsk: "Ctrl+G",
-    openPanel: "Alt+S"
+    openPanel: "Alt+S",
+    browserControl: "Ctrl+B"
 };
 
 export const DEFAULT_MODEL = "gemini-3-flash";

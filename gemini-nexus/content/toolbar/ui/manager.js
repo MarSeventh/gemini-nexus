@@ -218,6 +218,34 @@
             }
         }
 
+        updateModelList(settings, currentModel) {
+            const provider = settings.provider || (settings.useOfficialApi ? 'official' : 'web');
+            let opts = [];
+            
+            if (provider === 'official') {
+                opts = [
+                    { val: 'gemini-3-flash-preview', txt: 'Gemini 3 Flash' },
+                    { val: 'gemini-3-pro-preview', txt: 'Gemini 3 Pro' }
+                ];
+            } else if (provider === 'openai') {
+                const rawModels = settings.openaiModel || "";
+                const models = rawModels.split(',').map(m => m.trim()).filter(m => m);
+                if (models.length === 0) {
+                    opts = [{ val: 'openai_custom', txt: 'Custom Model' }];
+                } else {
+                    opts = models.map(m => ({ val: m, txt: m }));
+                }
+            } else {
+                opts = [
+                    { val: 'gemini-3-flash', txt: 'Fast' },
+                    { val: 'gemini-3-flash-thinking', txt: 'Thinking' },
+                    { val: 'gemini-3-pro', txt: '3 Pro' }
+                ];
+            }
+
+            this.view.updateModelOptions(opts, currentModel);
+        }
+
         // --- Grammar Mode Delegation ---
 
         setGrammarMode(enabled, sourceElement = null, selectionRange = null) {

@@ -43,6 +43,7 @@
                     <div class="submenu">
                         <div class="menu-item" id="btn-image-remove-bg">${ICONS.REMOVE_BG} <span>${t.removeBg}</span></div>
                         <div class="menu-item" id="btn-image-remove-text">${ICONS.REMOVE_TEXT} <span>${t.removeText}</span></div>
+                        <div class="menu-item" id="btn-image-remove-watermark">${ICONS.REMOVE_WATERMARK} <span>${t.removeWatermark}</span></div>
                         <div class="menu-item" id="btn-image-upscale">${ICONS.UPSCALE} <span>${t.upscale}</span></div>
                         <div class="menu-item" id="btn-image-expand">${ICONS.EXPAND} <span>${t.expand}</span></div>
                     </div>

@@ -1,4 +1,6 @@
 
+// content/toolbar/i18n.js
+
 (function() {
     // Simple localization for Content Script
     const isZh = navigator.language.startsWith('zh');
@@ -32,6 +34,7 @@
         imageTools: isZh ? "图像工具" : "Image tools",
         removeBg: isZh ? "背景移除" : "Remove background",
         removeText: isZh ? "文字移除" : "Remove text",
+        removeWatermark: isZh ? "去水印" : "Remove Watermark",
         upscale: isZh ? "画质提升" : "Upscale",
         expand: isZh ? "扩图" : "Expand",
 
@@ -51,8 +54,8 @@
                 "Please OCR this image. Extract the text content exactly as is, without any explanation.",
             
             imageTranslate: isZh ? 
-                "请识别这张图片中的文字并将其翻译成中文。仅输出翻译后的内容。" : 
-                "Please extract the text from this image and translate it into English. Output ONLY the translation.",
+                "请识别图片中的文字并翻译：如果是英文则译为中文，是中文则译为英文，其他语言译为中文。仅输出翻译结果。" : 
+                "Extract text and translate: If English -> Chinese, If Chinese -> English, Others -> Chinese. Output only translation.",
             
             analyze: isZh ? 
                 "请详细分析并描述这张图片的内容。" : 
@@ -74,14 +77,18 @@
                 "请移除这张图片的背景。生成一张带有透明背景的主体图片。" : 
                 "Please remove the background from this image. Generate a new image of the subject on a transparent background.",
             
+            removeWatermark: isZh ? 
+                "请移除这张图片上的所有水印、Logo 或覆盖文字，并完美填充背景，使其看起来像原始图片。" : 
+                "Please remove any watermarks, logos, or overlay text from this image, filling in the background seamlessly to look like the original image.",
+            
             snipAnalyze: isZh ? 
                 "请详细描述这张截图的内容。" : 
                 "Please describe the content of this screenshot in detail.",
 
             // Text Actions
             textTranslate: (text) => isZh ? 
-                `将以下内容翻译成地道的中文（若原文非中文）或英文（若原文为中文）。请直接输出翻译后的文本，不要包含任何解释、前言或额外说明：\n\n"${text}"` : 
-                `Translate the following text into natural English (if source is not English) or to the most likely target language (if source is English). Output ONLY the translation without any preamble or explanation:\n\n"${text}"`,
+                `请将以下文本翻译：\n- 如果是英文，翻译为中文。\n- 如果是中文，翻译为英文。\n- 如果是其他语言，翻译为中文。\n\n仅输出翻译结果，不要包含任何解释：\n\n"${text}"` : 
+                `Translate the following text:\n- If it is English, translate to Chinese.\n- If it is Chinese, translate to English.\n- If it is any other language, translate to Chinese.\n\nOutput ONLY the translation, no explanation:\n\n"${text}"`,
             
             explain: (text) => isZh ? 
                 `用通俗易懂的语言简要解释以下内容：\n\n"${text}"` : 
@@ -105,6 +112,7 @@
             expand: isZh ? "正在扩图..." : "Expanding image...",
             removeText: isZh ? "正在移除文字..." : "Removing text...",
             removeBg: isZh ? "正在移除背景..." : "Removing background...",
+            removeWatermark: isZh ? "正在去除水印..." : "Removing watermark...",
             snip: isZh ? "正在分析截图..." : "Analyzing snip...",
             explain: isZh ? '正在解释...' : 'Explaining...',
             summarize: isZh ? '正在总结...' : 'Summarizing...',
@@ -121,6 +129,7 @@
             expand: isZh ? "扩图" : "Expand Image",
             removeText: isZh ? "文字移除" : "Remove Text",
             removeBg: isZh ? "背景移除" : "Remove Background",
+            removeWatermark: isZh ? "去水印" : "Remove Watermark",
             snip: isZh ? "截图分析" : "Analyze Snip",
             explain: isZh ? '解释选中内容' : 'Explain selected text',
             textTranslate: isZh ? '翻译选中内容' : 'Translate selected text',
@@ -136,6 +145,7 @@
             expand: isZh ? "扩图" : "Image Expansion",
             removeText: isZh ? "文字移除" : "Remove Text",
             removeBg: isZh ? "背景移除" : "Remove Background",
+            removeWatermark: isZh ? "去水印" : "Remove Watermark",
             snip: isZh ? "截图分析" : "Snip Analysis",
             explain: isZh ? '解释' : 'Explain',
             textTranslate: isZh ? '翻译' : 'Translate',

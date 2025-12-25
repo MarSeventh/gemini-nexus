@@ -115,7 +115,8 @@ export class AuthManager {
     async resetContext() {
         this.currentContext = null;
         this.lastModel = null;
-        await chrome.storage.local.remove(['geminiContext', 'geminiModel']);
+        // Do not remove geminiModel to preserve user preference in UI
+        await chrome.storage.local.remove(['geminiContext']);
         
         // Rotate to spread load on reset
         if (this.accountIndices.length > 1) {

@@ -1,4 +1,3 @@
-
 // services/providers/official.js
 
 /**
@@ -108,6 +107,11 @@ export async function sendOfficialMessage(prompt, systemInstruction, history, ap
         contents: contents,
         generationConfig: {
             temperature: 1.0, // Official recommendation: Lock to 1.0 to prevent reasoning degradation
+            // Inject High-Res Image Configuration
+            imageConfig: {
+                aspectRatio: "1:1",
+                imageSize: "4K"
+            }
         }
     };
 

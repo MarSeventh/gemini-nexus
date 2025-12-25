@@ -5,6 +5,7 @@
         constructor(controller) {
             this.controller = controller;
             this.resizeObserver = null;
+            this.handleGlobalKeydown = this.handleGlobalKeydown.bind(this);
         }
 
         bind(elements, askWindow) {
@@ -58,6 +59,12 @@
                 this._add(buttons.imageRemoveText, 'click', (e) => {
                     e.preventDefault(); e.stopPropagation();
                     this.controller.actions.triggerAction(e, 'image_remove_text');
+                });
+            }
+            if (buttons.imageRemoveWatermark) {
+                this._add(buttons.imageRemoveWatermark, 'click', (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    this.controller.actions.triggerAction(e, 'image_remove_watermark');
                 });
             }
             if (buttons.imageUpscale) {
@@ -130,6 +137,23 @@
             }
 
             this._initResizeObserver(askWindow);
+
+            // Bind Global Escape Key
+            document.addEventListener('keydown', this.handleGlobalKeydown, true);
+        }
+
+        handleGlobalKeydown(e) {
+            if (e.key === 'Escape') {
+                if (this.controller.isWindowVisible()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.controller.actions.cancelAsk(e);
+                } else if (this.controller.isVisible()) {
+                    // Hides small toolbar (selection or image button)
+                    this.controller.hide();
+                    this.controller.hideImageButton();
+                }
+            }
         }
 
         _add(el, event, handler) {
@@ -166,6 +190,7 @@
             if (this.resizeObserver) {
                 this.resizeObserver.disconnect();
             }
+            document.removeEventListener('keydown', this.handleGlobalKeydown, true);
         }
     }
 

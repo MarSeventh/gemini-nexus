@@ -68,6 +68,7 @@
                     // Image Edit Buttons
                     imageRemoveBg: get('btn-image-remove-bg'),
                     imageRemoveText: get('btn-image-remove-text'),
+                    imageRemoveWatermark: get('btn-image-remove-watermark'),
                     imageUpscale: get('btn-image-upscale'),
                     imageExpand: get('btn-image-expand')
                 }
@@ -120,6 +121,29 @@
                 this.elements.askModelSelect.value = model;
                 if(Utils && Utils.resizeSelect) Utils.resizeSelect(this.elements.askModelSelect);
             }
+        }
+
+        updateModelOptions(options, selectedValue) {
+            const select = this.elements.askModelSelect;
+            if (!select) return;
+
+            select.innerHTML = '';
+            options.forEach(o => {
+                const opt = document.createElement('option');
+                opt.value = o.val;
+                opt.textContent = o.txt;
+                select.appendChild(opt);
+            });
+
+            // Select value if valid, otherwise first option
+            if (selectedValue && options.some(o => o.val === selectedValue)) {
+                select.value = selectedValue;
+            } else if (options.length > 0) {
+                select.value = options[0].val;
+            }
+            
+            const Utils = window.GeminiViewUtils;
+            if (Utils && Utils.resizeSelect) Utils.resizeSelect(select);
         }
 
         // --- General ---
