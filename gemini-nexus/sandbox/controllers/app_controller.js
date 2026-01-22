@@ -193,6 +193,11 @@ export class AppController {
             return;
         }
 
+        if (action === 'RESTORE_QUICK_ACTION_MODEL') {
+            this.ui.settings.updateQuickActionModel(payload);
+            return;
+        }
+
         if (action === 'BACKGROUND_MESSAGE') {
             if (payload.action === 'SWITCH_SESSION') {
                 this.switchToSession(payload.sessionId);

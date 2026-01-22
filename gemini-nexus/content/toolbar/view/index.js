@@ -14,12 +14,6 @@
             // Initialize Sub-Views
             this.widgetView = new window.GeminiViewWidget(this.elements);
             this.windowView = new window.GeminiViewWindow(this.elements);
-            
-            // Initial resize of model select if exists
-            const Utils = window.GeminiViewUtils;
-            if (this.elements.askModelSelect && Utils && Utils.resizeSelect) {
-                Utils.resizeSelect(this.elements.askModelSelect);
-            }
         }
 
         cacheElements() {
@@ -38,6 +32,11 @@
                 resultArea: get('result-area'),
                 resultText: get('result-text'),
                 askModelSelect: get('ask-model-select'),
+
+                // Model Dropdown Elements
+                modelDropdown: get('model-dropdown'),
+                modelDropdownTrigger: get('model-dropdown-trigger'),
+                modelDropdownMenu: get('model-dropdown-menu'),
                 
                 // Footer Elements
                 windowFooter: get('window-footer'),
@@ -110,41 +109,96 @@
         undockWindow() { this.windowView.undockWindow(); }
 
         // --- Model Selection ---
-        
+
         getSelectedModel() {
-            return this.elements.askModelSelect ? this.elements.askModelSelect.value : "gemini-2.5-flash";
+            const dropdown = this.elements.modelDropdown;
+            if (dropdown) {
+                const selected = dropdown.querySelector('.model-dropdown-item.selected');
+                return selected ? selected.dataset.value : "gemini-2.5-flash";
+            }
+            return "gemini-2.5-flash";
         }
+
 
         setSelectedModel(model) {
-            const Utils = window.GeminiViewUtils;
-            if (this.elements.askModelSelect && model) {
-                this.elements.askModelSelect.value = model;
-                if(Utils && Utils.resizeSelect) Utils.resizeSelect(this.elements.askModelSelect);
-            }
+            const dropdown = this.elements.modelDropdown;
+            if (!dropdown || !model) return;
+
+            const items = dropdown.querySelectorAll('.model-dropdown-item');
+            const trigger = dropdown.querySelector('.model-dropdown-text');
+
+            items.forEach(item => {
+                if (item.dataset.value === model) {
+                    item.classList.add('selected');
+                    if (trigger) {
+                        trigger.textContent = item.querySelector('span:last-child').textContent;
+                    }
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
         }
+
 
         updateModelOptions(options, selectedValue) {
-            const select = this.elements.askModelSelect;
-            if (!select) return;
+            const dropdown = this.elements.modelDropdown;
+            const menu = this.elements.modelDropdownMenu;
+            const trigger = dropdown ? dropdown.querySelector('.model-dropdown-text') : null;
+            if (!menu) return;
 
-            select.innerHTML = '';
-            options.forEach(o => {
-                const opt = document.createElement('option');
-                opt.value = o.val;
-                opt.textContent = o.txt;
-                select.appendChild(opt);
+            menu.innerHTML = '';
+
+            options.forEach((o, index) => {
+                const item = document.createElement('div');
+                item.className = 'model-dropdown-item';
+                item.dataset.value = o.val;
+
+                const isSelected = selectedValue ? o.val === selectedValue : index === 0;
+                if (isSelected) {
+                    item.classList.add('selected');
+                    if (trigger) trigger.textContent = o.txt;
+                }
+
+                item.innerHTML = `
+                    <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                    <span>${o.txt}</span>
+                `;
+                menu.appendChild(item);
+            });
+        }
+
+        toggleModelDropdown(forceClose = false) {
+            const dropdown = this.elements.modelDropdown;
+            if (!dropdown) return;
+
+            if (forceClose) {
+                dropdown.classList.remove('open');
+            } else {
+                dropdown.classList.toggle('open');
+            }
+        }
+
+        selectModelItem(value) {
+            const dropdown = this.elements.modelDropdown;
+            if (!dropdown) return;
+
+            const items = dropdown.querySelectorAll('.model-dropdown-item');
+            const trigger = dropdown.querySelector('.model-dropdown-text');
+
+            items.forEach(item => {
+                if (item.dataset.value === value) {
+                    item.classList.add('selected');
+                    if (trigger) {
+                        trigger.textContent = item.querySelector('span:last-child').textContent;
+                    }
+                } else {
+                    item.classList.remove('selected');
+                }
             });
 
-            // Select value if valid, otherwise first option
-            if (selectedValue && options.some(o => o.val === selectedValue)) {
-                select.value = selectedValue;
-            } else if (options.length > 0) {
-                select.value = options[0].val;
-            }
-            
-            const Utils = window.GeminiViewUtils;
-            if (Utils && Utils.resizeSelect) Utils.resizeSelect(select);
+            this.toggleModelDropdown(true);
         }
+
 
         // --- General ---
 

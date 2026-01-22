@@ -5,11 +5,28 @@ export const ConnectionSettingsTemplate = `
     
     <div style="margin-bottom: 12px;">
         <label data-i18n="connectionProvider" style="font-weight: 500; display: block; margin-bottom: 6px;">Model Provider</label>
-        <select id="provider-select" class="shortcut-input" style="width: 100%; text-align: left; padding: 8px 12px;">
-            <option value="web" data-i18n="providerWeb">Gemini Web Client (Free)</option>
-            <option value="official" data-i18n="providerOfficial">Google Gemini API</option>
-            <option value="openai" data-i18n="providerOpenAI">OpenAI Compatible API</option>
-        </select>
+        <div class="settings-dropdown" id="provider-dropdown" style="width: 100%;">
+            <button class="settings-dropdown-trigger" id="provider-dropdown-trigger" type="button" style="width: 100%;">
+                <span class="dropdown-text" data-i18n="providerWeb">Gemini Web Client (Free)</span>
+                <span class="dropdown-arrow">
+                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </span>
+            </button>
+            <div class="settings-dropdown-menu" id="provider-dropdown-menu">
+                <div class="settings-dropdown-item selected" data-value="web">
+                    <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                    <span class="item-text" data-i18n="providerWeb">Gemini Web Client (Free)</span>
+                </div>
+                <div class="settings-dropdown-item" data-value="official">
+                    <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                    <span class="item-text" data-i18n="providerOfficial">Google Gemini API</span>
+                </div>
+                <div class="settings-dropdown-item" data-value="openai">
+                    <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                    <span class="item-text" data-i18n="providerOpenAI">OpenAI Compatible API</span>
+                </div>
+            </div>
+        </div>
     </div>
     
     <div id="api-key-container" style="display: none; flex-direction: column; gap: 12px; margin-bottom: 12px; padding: 12px; background: rgba(0,0,0,0.03); border-radius: 8px;">
@@ -21,12 +38,32 @@ export const ConnectionSettingsTemplate = `
             </div>
             <div>
                 <label style="font-weight: 500; display: block; margin-bottom: 2px;">Thinking Level (Gemini 3)</label>
-                <select id="thinking-level-select" class="shortcut-input" style="width: 100%; text-align: left; padding: 6px 12px;">
-                    <option value="minimal">Minimal (Flash Only)</option>
-                    <option value="low">Low (Faster)</option>
-                    <option value="medium">Medium (Balanced)</option>
-                    <option value="high">High (Deep Reasoning)</option>
-                </select>
+                <div class="settings-dropdown" id="thinking-level-dropdown" style="width: 100%;">
+                    <button class="settings-dropdown-trigger" id="thinking-level-trigger" type="button" style="width: 100%;">
+                        <span class="dropdown-text">Minimal (Flash Only)</span>
+                        <span class="dropdown-arrow">
+                            <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        </span>
+                    </button>
+                    <div class="settings-dropdown-menu" id="thinking-level-menu">
+                        <div class="settings-dropdown-item selected" data-value="minimal">
+                            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                            <span class="item-text">Minimal (Flash Only)</span>
+                        </div>
+                        <div class="settings-dropdown-item" data-value="low">
+                            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                            <span class="item-text">Low (Faster)</span>
+                        </div>
+                        <div class="settings-dropdown-item" data-value="medium">
+                            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                            <span class="item-text">Medium (Balanced)</span>
+                        </div>
+                        <div class="settings-dropdown-item" data-value="high">
+                            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                            <span class="item-text">High (Deep Reasoning)</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -63,7 +100,15 @@ export const ConnectionSettingsTemplate = `
             <div>
                 <label data-i18n="mcpActiveServer" style="font-weight: 500; display: block; margin-bottom: 6px;">Active Server</label>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                    <select id="mcp-server-select" class="shortcut-input" style="flex: 1; text-align: left; padding: 6px 12px;"></select>
+                    <div class="settings-dropdown" id="mcp-server-dropdown" style="flex: 1;">
+                        <button class="settings-dropdown-trigger" id="mcp-server-trigger" type="button" style="width: 100%;">
+                            <span class="dropdown-text">Select Server</span>
+                            <span class="dropdown-arrow">
+                                <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                            </span>
+                        </button>
+                        <div class="settings-dropdown-menu" id="mcp-server-menu"></div>
+                    </div>
                     <button id="mcp-add-server" class="tool-btn" style="padding: 6px 10px;" type="button" data-i18n="mcpAddServer">Add</button>
                     <button id="mcp-remove-server" class="tool-btn" style="padding: 6px 10px;" type="button" data-i18n="mcpRemoveServer">Remove</button>
                 </div>
@@ -75,11 +120,28 @@ export const ConnectionSettingsTemplate = `
             </div>
             <div>
                 <label data-i18n="mcpTransport" style="font-weight: 500; display: block; margin-bottom: 2px;">Transport</label>
-                <select id="mcp-transport" class="shortcut-input" style="width: 100%; text-align: left; padding: 6px 12px;">
-                    <option value="sse">SSE (http://.../sse)</option>
-                    <option value="streamable-http">Streamable HTTP (http://.../mcp)</option>
-                    <option value="ws">WebSocket (ws://)</option>
-                </select>
+                <div class="settings-dropdown" id="mcp-transport-dropdown" style="width: 100%;">
+                    <button class="settings-dropdown-trigger" id="mcp-transport-trigger" type="button" style="width: 100%;">
+                        <span class="dropdown-text">SSE (http://.../sse)</span>
+                        <span class="dropdown-arrow">
+                            <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        </span>
+                    </button>
+                    <div class="settings-dropdown-menu" id="mcp-transport-menu">
+                        <div class="settings-dropdown-item selected" data-value="sse">
+                            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                            <span class="item-text">SSE (http://.../sse)</span>
+                        </div>
+                        <div class="settings-dropdown-item" data-value="streamable-http">
+                            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                            <span class="item-text">Streamable HTTP (http://.../mcp)</span>
+                        </div>
+                        <div class="settings-dropdown-item" data-value="ws">
+                            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                            <span class="item-text">WebSocket (ws://)</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div>
                 <label data-i18n="mcpServerUrl" style="font-weight: 500; display: block; margin-bottom: 2px;">Server URL</label>
@@ -97,10 +159,24 @@ export const ConnectionSettingsTemplate = `
             <div style="margin-top: 6px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; flex-direction: column; gap: 10px;">
                 <div>
                     <label data-i18n="mcpToolMode" style="font-weight: 500; display: block; margin-bottom: 6px;">Expose Tools</label>
-                    <select id="mcp-tool-mode" class="shortcut-input" style="width: 100%; text-align: left; padding: 6px 12px;">
-                        <option value="all" data-i18n="mcpToolModeAll">All tools (default)</option>
-                        <option value="selected" data-i18n="mcpToolModeSelected">Selected tools only</option>
-                    </select>
+                    <div class="settings-dropdown" id="mcp-tool-mode-dropdown" style="width: 100%;">
+                        <button class="settings-dropdown-trigger" id="mcp-tool-mode-trigger" type="button" style="width: 100%;">
+                            <span class="dropdown-text" data-i18n="mcpToolModeAll">All tools (default)</span>
+                            <span class="dropdown-arrow">
+                                <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                            </span>
+                        </button>
+                        <div class="settings-dropdown-menu" id="mcp-tool-mode-menu">
+                            <div class="settings-dropdown-item selected" data-value="all">
+                                <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                                <span class="item-text" data-i18n="mcpToolModeAll">All tools (default)</span>
+                            </div>
+                            <div class="settings-dropdown-item" data-value="selected">
+                                <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                                <span class="item-text" data-i18n="mcpToolModeSelected">Selected tools only</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="display: flex; gap: 8px; align-items: center;">

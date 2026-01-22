@@ -1,4 +1,3 @@
-
 // content/toolbar/i18n.js
 
 (function() {
@@ -19,6 +18,7 @@
         retry: isZh ? "重试" : "Retry",
         openSidebar: isZh ? "在侧边栏继续" : "Open in Sidebar",
         chat: isZh ? "对话" : "Chat",
+        quickActionModel: isZh ? "快捷功能默认模型" : "Quick Action Model",
         insert: isZh ? "插入" : "Insert",
         insertTooltip: isZh ? "插入到光标位置" : "Insert at cursor",
         replace: isZh ? "替换" : "Replace",
@@ -154,3 +154,4 @@
         }
     };
 })();
+

@@ -15,7 +15,44 @@
             });
 
             this.streamHandler = new window.GeminiStreamHandler(this.ui, {
-                onSessionId: (id) => { this.lastSessionId = id; }
+                onSessionId: (id) => { this.lastSessionId = id; },
+                onPendingSession: (data) => {
+                    // Accumulate messages for multi-turn conversations
+                    if (this.pendingSession && this.pendingSession.messages) {
+                        // Append new user message and AI response
+                        this.pendingSession.messages.push({
+                            role: 'user',
+                            text: data.text,
+                            files: data.files
+                        });
+                        this.pendingSession.messages.push({
+                            role: 'ai',
+                            text: data.result.text,
+                            thoughts: data.result.thoughts,
+                            images: data.result.images
+                        });
+                        // Update context
+                        this.pendingSession.context = data.result.context;
+                    } else {
+                        // First message - create new pending session
+                        this.pendingSession = {
+                            messages: [
+                                {
+                                    role: 'user',
+                                    text: data.text,
+                                    files: data.files
+                                },
+                                {
+                                    role: 'ai',
+                                    text: data.result.text,
+                                    thoughts: data.result.thoughts,
+                                    images: data.result.images
+                                }
+                            ],
+                            context: data.result.context
+                        };
+                    }
+                }
             });
 
             this.inputManager = new window.GeminiInputManager();
@@ -36,6 +73,7 @@
             this.lastRect = null;
             this.lastMousePoint = null;
             this.lastSessionId = null;
+            this.pendingSession = null; // Pending session data for deferred save
             this.currentMode = 'ask'; // 默认模式
             this.isSelectionEnabled = true;
 
@@ -66,7 +104,7 @@
             // Listen for global setting changes to keep toolbar in sync
             chrome.storage.onChanged.addListener((changes, area) => {
                 if (area === 'local') {
-                    const keys = ['geminiModel', 'geminiProvider', 'geminiUseOfficialApi', 'geminiOpenaiModel'];
+                    const keys = ['geminiModel', 'geminiQuickActionModel', 'geminiProvider', 'geminiUseOfficialApi', 'geminiOpenaiModel'];
                     if (keys.some(k => changes[k])) {
                         this.syncSettings();
                     }
@@ -81,6 +119,7 @@
         async syncSettings() {
             const result = await chrome.storage.local.get([
                 'geminiModel', 
+                'geminiQuickActionModel',
                 'geminiProvider', 
                 'geminiUseOfficialApi', 
                 'geminiOpenaiModel'
@@ -138,7 +177,8 @@
                 height: 100
             };
 
-            const model = this.ui.getSelectedModel();
+            const { geminiQuickActionModel } = await chrome.storage.local.get(['geminiQuickActionModel']);
+            const model = geminiQuickActionModel || this.ui.getSelectedModel();
 
             // Client-side Cropping
             let finalImage = request.image;
@@ -230,6 +270,7 @@
             chrome.storage.local.set({ 'geminiModel': model });
         }
 
+
         handleAction(actionType, data) {
             this.dispatcher.dispatch(actionType, data);
         }
@@ -252,6 +293,7 @@
         hideAll() {
             this.ui.hideAll();
             this.visible = false;
+            this.pendingSession = null; // Discard pending session when hiding all
         }
 
         showGlobalInput(withPageContext = false) {

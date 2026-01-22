@@ -9,7 +9,7 @@
         }
 
         bind(elements, askWindow) {
-            const { buttons, imageBtn, askInput, askModelSelect } = elements;
+            const { buttons, imageBtn, askInput, modelDropdown, modelDropdownTrigger, modelDropdownMenu } = elements;
 
             // --- Toolbar Buttons ---
             // Use .actions property to access delegate
@@ -118,12 +118,30 @@
                 e.stopPropagation();
             });
 
-            // --- Model Selection ---
-            this._add(askModelSelect, 'change', (e) => {
-                this.controller.handleModelChange(e.target.value);
-                const Utils = window.GeminiViewUtils;
-                if (Utils && Utils.resizeSelect) Utils.resizeSelect(e.target);
+            // --- Model Dropdown ---
+            this._add(modelDropdownTrigger, 'click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.controller.view.toggleModelDropdown();
             });
+
+            this._add(modelDropdownMenu, 'click', (e) => {
+                e.stopPropagation();
+                const item = e.target.closest('.model-dropdown-item');
+                if (item) {
+                    const value = item.dataset.value;
+                    this.controller.view.selectModelItem(value);
+                    this.controller.handleModelChange(value);
+                }
+            });
+
+            // Close dropdown when clicking outside
+            this._add(askWindow, 'click', (e) => {
+                if (!e.target.closest('.model-dropdown')) {
+                    this.controller.view.toggleModelDropdown(true);
+                }
+            });
+
 
             // Prevent event bubbling to page
             if (elements.askWindow) {

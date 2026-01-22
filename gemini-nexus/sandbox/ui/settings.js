@@ -16,6 +16,9 @@ export class SettingsController {
         this.textSelectionEnabled = true;
         this.imageToolsEnabled = true;
         this.accountIndices = "0";
+
+        // Quick actions default model
+        this.quickActionModel = "gemini-2.5-flash";
         
         // Connection State
         this.connectionData = {
@@ -54,6 +57,10 @@ export class SettingsController {
             onTextSelectionChange: (val) => { this.textSelectionEnabled = (val === 'on' || val === true); saveTextSelectionToStorage(this.textSelectionEnabled); },
             onImageToolsChange: (val) => { this.imageToolsEnabled = (val === 'on' || val === true); saveImageToolsToStorage(this.imageToolsEnabled); },
             onSidebarBehaviorChange: (val) => saveSidebarBehaviorToStorage(val),
+            onQuickActionModelChange: (model) => {
+                this.quickActionModel = model || "gemini-2.5-flash";
+                window.parent.postMessage({ action: 'SAVE_QUICK_ACTION_MODEL', payload: this.quickActionModel }, '*');
+            },
             onDownloadLogs: () => this.downloadLogs()
         });
         
@@ -89,6 +96,12 @@ export class SettingsController {
         this.view.setToggles(this.textSelectionEnabled, this.imageToolsEnabled);
         this.view.setAccountIndices(this.accountIndices);
         this.view.setConnectionSettings(this.connectionData);
+
+        // Ensure quick action model list reflects current provider models
+        if (typeof this.view.setModelOptions === 'function') {
+            this.view.setModelOptions(this._getModelOptionsForProvider(this.connectionData), this.quickActionModel);
+        }
+        this.view.setQuickActionModel(this.quickActionModel);
         
         // Refresh from storage
         requestTextSelectionFromStorage();
@@ -117,6 +130,10 @@ export class SettingsController {
         this.accountIndices = val;
         const cleaned = val.replace(/[^0-9,]/g, '');
         saveAccountIndicesToStorage(cleaned);
+
+        // Quick Action Model
+        this.quickActionModel = data.quickActionModel || this.quickActionModel || "gemini-2.5-flash";
+        window.parent.postMessage({ action: 'SAVE_QUICK_ACTION_MODEL', payload: this.quickActionModel }, '*');
         
         // Connection
         this.connectionData = {
@@ -223,6 +240,46 @@ export class SettingsController {
         }
         
         this.view.setConnectionSettings(this.connectionData);
+
+        // Keep quick action model options in sync with provider model list
+        if (typeof this.view.setModelOptions === 'function') {
+            this.view.setModelOptions(this._getModelOptionsForProvider(this.connectionData), this.quickActionModel);
+        }
+    }
+
+    updateQuickActionModel(model) {
+        this.quickActionModel = model || "gemini-2.5-flash";
+        if (typeof this.view.setQuickActionModel === 'function') {
+            this.view.setQuickActionModel(this.quickActionModel);
+        }
+    }
+
+    _getModelOptionsForProvider(settings) {
+        const provider = settings.provider || (settings.useOfficialApi ? 'official' : 'web');
+        let opts = [];
+
+        if (provider === 'official') {
+            opts = [
+                { val: 'gemini-3-flash-preview', txt: 'Gemini 3 Flash' },
+                { val: 'gemini-3-pro-preview', txt: 'Gemini 3 Pro' }
+            ];
+        } else if (provider === 'openai') {
+            const rawModels = settings.openaiModel || "";
+            const models = rawModels.split(',').map(m => m.trim()).filter(m => m);
+            if (models.length === 0) {
+                opts = [{ val: 'openai_custom', txt: 'Custom Model' }];
+            } else {
+                opts = models.map(m => ({ val: m, txt: m }));
+            }
+        } else {
+            opts = [
+                { val: 'gemini-3-flash', txt: 'Fast' },
+                { val: 'gemini-3-flash-thinking', txt: 'Thinking' },
+                { val: 'gemini-3-pro', txt: '3 Pro' }
+            ];
+        }
+
+        return opts;
     }
 
     updateMcpTestResult(result) {

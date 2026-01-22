@@ -131,6 +131,11 @@ class ToolbarActions {
         await this.ui.showAskWindow(rect, selection, title, mousePoint);
         this.ui.showLoading(loadingMsg);
 
+        // For quick actions, default to the quick-action model immediately.
+        if (model) {
+            this.ui.setSelectedModel(model);
+        }
+
         this.ui.setInputValue(inputPlaceholder);
 
         const msg = {
@@ -143,29 +148,30 @@ class ToolbarActions {
         chrome.runtime.sendMessage(msg);
     }
 
-    handleSubmitAsk(question, context, sessionId = null, model = "gemini-2.5-flash") {
+    handleSubmitAsk(question, context, sessionId = null, model = "gemini-2.5-flash", isFollowUp = false) {
         this.ui.showLoading();
-        
+
         let prompt = question;
         let includePageContext = false;
 
         if (context === "__PAGE_CONTEXT_FORCE__") {
             includePageContext = true;
-            context = null; 
+            context = null;
         }
 
         if (context) {
             prompt = `Context:\n${context}\n\nQuestion: ${question}`;
         }
-        
+
         const msg = {
             action: "QUICK_ASK",
             text: prompt,
             model: model,
             sessionId: sessionId,
-            includePageContext: includePageContext
+            includePageContext: includePageContext,
+            preserveContext: isFollowUp // Don't reset context for follow-up messages
         };
-        
+
         this.lastRequest = msg;
         chrome.runtime.sendMessage(msg);
     }
@@ -187,11 +193,20 @@ class ToolbarActions {
         chrome.runtime.sendMessage({ action: "CANCEL_PROMPT" });
     }
 
-    handleContinueChat(sessionId) {
-        chrome.runtime.sendMessage({ 
-            action: "OPEN_SIDE_PANEL",
-            sessionId: sessionId
-        });
+    handleContinueChat(sessionId, pendingSession = null) {
+        // If we have pending session data, save it first then open sidebar
+        if (pendingSession) {
+            chrome.runtime.sendMessage({
+                action: "SAVE_AND_CONTINUE_CHAT",
+                pendingSession: pendingSession
+            });
+        } else if (sessionId) {
+            // Legacy: session already saved, just open with sessionId
+            chrome.runtime.sendMessage({
+                action: "OPEN_SIDE_PANEL",
+                sessionId: sessionId
+            });
+        }
     }
 }
 

@@ -5,7 +5,7 @@
     class GeminiStreamHandler {
         constructor(uiController, callbacks) {
             this.ui = uiController;
-            this.callbacks = callbacks || {}; // { onSessionId }
+            this.callbacks = callbacks || {}; // { onSessionId, onPendingSession }
             this.handleStreamMessage = this.handleStreamMessage.bind(this);
         }
 
@@ -20,10 +20,19 @@
                     this.ui.showResult(request.text, null, true);
                 }
             }
-            
+
             if (request.action === "GEMINI_STREAM_DONE") {
                 const result = request.result;
-                
+
+                // Handle pending session data (for deferred save)
+                if (request.pendingSession) {
+                    if (this.callbacks.onPendingSession) {
+                        // Pass current pending session for accumulation
+                        this.callbacks.onPendingSession(request.pendingSession);
+                    }
+                }
+
+                // Legacy support for immediate save (sessionId)
                 if (request.sessionId) {
                     if (this.callbacks.onSessionId) {
                         this.callbacks.onSessionId(request.sessionId);

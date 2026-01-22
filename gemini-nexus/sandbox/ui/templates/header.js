@@ -8,11 +8,28 @@ export const HeaderTemplate = `
             </button>
             
             <div class="model-select-wrapper">
-                <select id="model-select" data-i18n-title="modelSelectTooltip" title="Select Model (Tab to cycle)">
-                    <option value="gemini-3-flash">Fast</option>
-                    <option value="gemini-3-flash-thinking">Thinking</option>
-                    <option value="gemini-3-pro">3 Pro</option>
-                </select>
+                <div class="settings-dropdown header-model-dropdown" id="model-dropdown">
+                    <button class="settings-dropdown-trigger" id="model-dropdown-trigger" type="button" data-i18n-title="modelSelectTooltip" title="Select Model (Tab to cycle)">
+                        <span class="dropdown-text">Fast</span>
+                        <span class="dropdown-arrow">
+                            <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        </span>
+                    </button>
+                    <div class="settings-dropdown-menu" id="model-dropdown-menu">
+                        <div class="settings-dropdown-item selected" data-value="gemini-3-flash">
+                            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                            <span class="item-text">Fast</span>
+                        </div>
+                        <div class="settings-dropdown-item" data-value="gemini-3-flash-thinking">
+                            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                            <span class="item-text">Thinking</span>
+                        </div>
+                        <div class="settings-dropdown-item" data-value="gemini-3-pro">
+                            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                            <span class="item-text">3 Pro</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

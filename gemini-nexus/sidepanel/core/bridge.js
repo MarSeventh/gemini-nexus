@@ -130,6 +130,7 @@ export class MessageBridge {
         if (action === 'SAVE_SESSIONS') this.state.save('geminiSessions', payload);
         if (action === 'SAVE_SHORTCUTS') this.state.save('geminiShortcuts', payload);
         if (action === 'SAVE_MODEL') this.state.save('geminiModel', payload);
+        if (action === 'SAVE_QUICK_ACTION_MODEL') this.state.save('geminiQuickActionModel', payload);
         if (action === 'SAVE_THEME') this.state.save('geminiTheme', payload);
         if (action === 'SAVE_LANGUAGE') this.state.save('geminiLanguage', payload);
         if (action === 'SAVE_TEXT_SELECTION') this.state.save('geminiTextSelectionEnabled', payload);

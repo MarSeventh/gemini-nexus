@@ -34,6 +34,24 @@ export class SessionMessageHandler {
             return true;
         }
 
+        // --- SAVE AND CONTINUE CHAT (Deferred session save) ---
+        if (request.action === "SAVE_AND_CONTINUE_CHAT") {
+            (async () => {
+                const result = await this.quickAskHandler.handleSaveAndContinue(request, sender);
+                // Open side panel with the new session ID
+                if (result.sessionId && sender.tab) {
+                    await chrome.storage.local.set({ pendingSessionId: result.sessionId });
+                    setTimeout(() => {
+                        chrome.storage.local.remove(['pendingSessionId']);
+                    }, 5000);
+                    await chrome.sidePanel.open({ tabId: sender.tab.id, windowId: sender.tab.windowId })
+                        .catch(err => console.error("Could not open side panel:", err));
+                }
+                sendResponse({ status: "completed", sessionId: result.sessionId });
+            })();
+            return true;
+        }
+
         // --- CONTROL ---
         if (request.action === "CANCEL_PROMPT") {
             const cancelled = this.sessionManager.cancelCurrentRequest();

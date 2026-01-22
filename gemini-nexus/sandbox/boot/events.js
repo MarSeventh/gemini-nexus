@@ -78,45 +78,86 @@ export function bindAppEvents(app, ui, setResizeRef) {
         });
     }
 
-    // Model Selector
-    const modelSelect = document.getElementById('model-select');
-    
-    // Auto-resize Logic
-    const resizeModelSelect = () => {
-        if (!modelSelect) return;
-        
-        // Safety: Ensure selectedIndex is valid
-        if (modelSelect.selectedIndex === -1) {
-            if (modelSelect.options.length > 0) modelSelect.selectedIndex = 0;
+    // Model Selector (Custom Dropdown)
+    const modelDropdown = document.getElementById('model-dropdown');
+    const modelTrigger = document.getElementById('model-dropdown-trigger');
+    const modelMenu = document.getElementById('model-dropdown-menu');
+
+    const toggleModelDropdown = (forceClose = false) => {
+        if (!modelDropdown) return;
+        if (forceClose) {
+            modelDropdown.classList.remove('open');
+        } else {
+            modelDropdown.classList.toggle('open');
         }
-        if (modelSelect.selectedIndex === -1) return;
-
-        const tempSpan = document.createElement('span');
-        Object.assign(tempSpan.style, {
-            visibility: 'hidden',
-            position: 'absolute',
-            fontSize: '13px',
-            fontWeight: '500',
-            fontFamily: window.getComputedStyle(modelSelect).fontFamily,
-            whiteSpace: 'nowrap'
-        });
-        tempSpan.textContent = modelSelect.options[modelSelect.selectedIndex].text;
-        document.body.appendChild(tempSpan);
-        const width = tempSpan.getBoundingClientRect().width;
-        document.body.removeChild(tempSpan);
-        modelSelect.style.width = `${width + 34}px`;
     };
-    
-    if (setResizeRef) setResizeRef(resizeModelSelect); // Expose for message handler
 
-    if (modelSelect) {
-        modelSelect.addEventListener('change', (e) => {
-             app.handleModelChange(e.target.value);
-             resizeModelSelect();
+    const selectModelItem = (value) => {
+        if (!modelDropdown || !modelMenu) return;
+        const items = modelMenu.querySelectorAll('.settings-dropdown-item');
+        const triggerText = modelTrigger ? modelTrigger.querySelector('.dropdown-text') : null;
+
+        items.forEach(item => {
+            if (item.dataset.value === value) {
+                item.classList.add('selected');
+                if (triggerText) {
+                    triggerText.textContent = item.querySelector('.item-text').textContent;
+                }
+            } else {
+                item.classList.remove('selected');
+            }
         });
-        // Call initial resize after a short delay to ensure fonts/styles loaded
-        setTimeout(resizeModelSelect, 50);
+        toggleModelDropdown(true);
+    };
+
+    const getSelectedModel = () => {
+        if (!modelMenu) return null;
+        const selected = modelMenu.querySelector('.settings-dropdown-item.selected');
+        return selected ? selected.dataset.value : null;
+    };
+
+    const cycleModel = (direction) => {
+        if (!modelMenu) return;
+        const items = Array.from(modelMenu.querySelectorAll('.settings-dropdown-item'));
+        if (items.length === 0) return;
+
+        let currentIndex = items.findIndex(item => item.classList.contains('selected'));
+        if (currentIndex === -1) currentIndex = 0;
+
+        const newIndex = (currentIndex + direction + items.length) % items.length;
+        const newValue = items[newIndex].dataset.value;
+        selectModelItem(newValue);
+        app.handleModelChange(newValue);
+    };
+
+    if (setResizeRef) setResizeRef(() => {}); // No-op for compatibility
+
+    if (modelTrigger) {
+        modelTrigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleModelDropdown();
+        });
     }
+
+    if (modelMenu) {
+        modelMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const item = e.target.closest('.settings-dropdown-item');
+            if (item) {
+                const value = item.dataset.value;
+                selectModelItem(value);
+                app.handleModelChange(value);
+            }
+        });
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (modelDropdown && !modelDropdown.contains(e.target)) {
+            toggleModelDropdown(true);
+        }
+    });
 
     // Input Key Handling
     const inputFn = document.getElementById('prompt');
@@ -127,12 +168,8 @@ export function bindAppEvents(app, ui, setResizeRef) {
             // Tab Cycle Models
             if (e.key === 'Tab') {
                 e.preventDefault();
-                if (modelSelect) {
-                    const direction = e.shiftKey ? -1 : 1;
-                    const newIndex = (modelSelect.selectedIndex + direction + modelSelect.length) % modelSelect.length;
-                    modelSelect.selectedIndex = newIndex;
-                    modelSelect.dispatchEvent(new Event('change'));
-                }
+                const direction = e.shiftKey ? -1 : 1;
+                cycleModel(direction);
                 return;
             }
 

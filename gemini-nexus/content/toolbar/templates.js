@@ -58,11 +58,28 @@
             <div class="ask-header" id="ask-header">
                 <span class="window-title" id="window-title">${t.windowTitle}</span>
                 <div class="header-actions">
-                    <select id="ask-model-select" class="ask-model-select">
-                        <option value="gemini-3-flash">Fast</option>
-                        <option value="gemini-3-flash-thinking">Thinking</option>
-                        <option value="gemini-3-pro">3 Pro</option>
-                    </select>
+                    <div class="model-dropdown" id="model-dropdown">
+                        <button class="model-dropdown-trigger" id="model-dropdown-trigger" type="button">
+                            <span class="model-dropdown-text">Fast</span>
+                            <span class="dropdown-arrow">
+                                <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                            </span>
+                        </button>
+                        <div class="model-dropdown-menu" id="model-dropdown-menu">
+                            <div class="model-dropdown-item selected" data-value="gemini-3-flash">
+                                <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                                <span>Fast</span>
+                            </div>
+                            <div class="model-dropdown-item" data-value="gemini-3-flash-thinking">
+                                <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                                <span>Thinking</span>
+                            </div>
+                            <div class="model-dropdown-item" data-value="gemini-3-pro">
+                                <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                                <span>3 Pro</span>
+                            </div>
+                        </div>
+                    </div>
                     <button class="icon-btn" id="btn-header-close" title="${t.close}">${ICONS.CLOSE}</button>
                 </div>
             </div>

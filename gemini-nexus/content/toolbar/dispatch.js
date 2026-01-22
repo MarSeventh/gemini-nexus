@@ -16,6 +16,11 @@
         dispatch(actionType, data) {
             const currentModel = this.ui.getSelectedModel();
 
+            const getQuickModel = async () => {
+                const { geminiQuickActionModel } = await chrome.storage.local.get(['geminiQuickActionModel']);
+                return geminiQuickActionModel || currentModel;
+            };
+
             switch(actionType) {
                 case 'copy_selection':
                     if (this.controller.currentSelection) {
@@ -99,14 +104,18 @@
                 case 'summarize':
                     if (!this.controller.currentSelection) return;
                     this.controller.lastSessionId = null;
-                    this.actions.handleQuickAction(actionType, this.controller.currentSelection, this.controller.lastRect, currentModel, this.controller.lastMousePoint);
+                    getQuickModel().then((model) => {
+                        this.actions.handleQuickAction(actionType, this.controller.currentSelection, this.controller.lastRect, model, this.controller.lastMousePoint);
+                    });
                     break;
 
                 case 'grammar':
                     if (!this.controller.currentSelection) return;
                     this.ui.setGrammarMode(true, this.inputManager.source, this.inputManager.range);
                     this.controller.lastSessionId = null;
-                    this.actions.handleQuickAction(actionType, this.controller.currentSelection, this.controller.lastRect, currentModel, this.controller.lastMousePoint);
+                    getQuickModel().then((model) => {
+                        this.actions.handleQuickAction(actionType, this.controller.currentSelection, this.controller.lastRect, model, this.controller.lastMousePoint);
+                    });
                     break;
 
                 case 'insert_result':
@@ -121,7 +130,9 @@
                     const question = data;
                     const context = this.controller.currentSelection;
                     if (question) {
-                        this.actions.handleSubmitAsk(question, context, this.controller.lastSessionId, currentModel);
+                        // If we have pendingSession, this is a follow-up message
+                        const isFollowUp = !!this.controller.pendingSession;
+                        this.actions.handleSubmitAsk(question, context, this.controller.lastSessionId, currentModel, isFollowUp);
                     }
                     break;
 
@@ -134,6 +145,7 @@
                     this.ui.hideAskWindow();
                     this.controller.visible = false;
                     this.controller.lastSessionId = null;
+                    this.controller.pendingSession = null; // Discard pending session
                     break;
 
                 case 'stop_ask':
@@ -142,10 +154,11 @@
                     break;
 
                 case 'continue_chat':
-                    this.actions.handleContinueChat(this.controller.lastSessionId);
+                    this.actions.handleContinueChat(this.controller.lastSessionId, this.controller.pendingSession);
                     this.ui.hideAskWindow();
                     this.controller.visible = false;
                     this.controller.lastSessionId = null;
+                    this.controller.pendingSession = null; // Clear pending session
                     break;
             }
         }

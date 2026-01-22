@@ -79,7 +79,8 @@ export class SettingsView {
             connection: connectionData,
             textSelection: generalData.textSelection,
             imageTools: generalData.imageTools,
-            accountIndices: generalData.accountIndices
+            accountIndices: generalData.accountIndices,
+            quickActionModel: generalData.quickActionModel
         };
         
         this.fire('onSave', data);
@@ -134,6 +135,14 @@ export class SettingsView {
 
     setAccountIndices(val) {
         this.general.setAccountIndices(val);
+    }
+
+    setModelOptions(options, selectedValue) {
+        this.general.setModelOptions(options, selectedValue);
+    }
+
+    setQuickActionModel(model) {
+        this.general.setQuickActionModel(model);
     }
 
     // Delegation to Connection

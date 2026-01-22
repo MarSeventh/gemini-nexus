@@ -27,6 +27,22 @@ export const GeneralSettingsTemplate = `
         <input type="text" id="account-indices-input" class="shortcut-input" style="width: 100px; text-align: left;" placeholder="0">
     </div>
 
+    <div class="shortcut-row" style="margin-bottom: 12px; align-items: flex-start;">
+        <div style="flex: 1; margin-right: 12px;">
+            <label data-i18n="quickActionModel" style="font-weight: 500; display: block; margin-bottom: 2px;">Quick Action Model</label>
+            <span class="setting-desc" data-i18n="quickActionModelDesc">Default model used for translate/explain/summarize shortcuts.</span>
+        </div>
+        <div class="settings-dropdown" id="quick-action-model-dropdown">
+            <button class="settings-dropdown-trigger" id="quick-action-model-trigger" type="button">
+                <span class="dropdown-text">Select Model</span>
+                <span class="dropdown-arrow">
+                    <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                </span>
+            </button>
+            <div class="settings-dropdown-menu" id="quick-action-model-menu"></div>
+        </div>
+    </div>
+
     <div style="margin-top: 16px;">
         <h5 data-i18n="sidebarBehavior" style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: var(--text-primary);">When Sidebar Reopens</h5>
         

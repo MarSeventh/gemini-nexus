@@ -35,6 +35,7 @@
             this.renderer = null;
             this.actionsDelegate = null;
             this.codeCopyHandler = null;
+
         }
 
         setCallbacks(callbacks) {
@@ -115,6 +116,7 @@
         handleModelChange(model) {
             this.fireCallback('onModelChange', model);
         }
+
 
         saveWindowDimensions(w, h) {
             chrome.storage.local.set({ 'gemini_nexus_window_size': { w, h } });
@@ -212,11 +214,13 @@
             return this.view ? this.view.getSelectedModel() : "gemini-2.5-flash";
         }
 
+
         setSelectedModel(model) {
             if (this.view) {
                 this.view.setSelectedModel(model);
             }
         }
+
 
         updateModelList(settings, currentModel) {
             const provider = settings.provider || (settings.useOfficialApi ? 'official' : 'web');
@@ -244,6 +248,7 @@
             }
 
             this.view.updateModelOptions(opts, currentModel);
+
         }
 
         // --- Grammar Mode Delegation ---

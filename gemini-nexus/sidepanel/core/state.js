@@ -17,6 +17,7 @@ export class StateManager {
             'pendingMode', // Fetch pending mode (e.g. browser_control)
             'geminiShortcuts',
             'geminiModel',
+            'geminiQuickActionModel',
             'pendingImage',
             'geminiSidebarBehavior',
             'geminiTextSelectionEnabled',
@@ -94,6 +95,9 @@ export class StateManager {
         
         // Model restore should happen after connection settings to ensure the correct list is active
         this.frame.postMessage({ action: 'RESTORE_MODEL', payload: this.data.geminiModel || 'gemini-2.5-flash' });
+
+        // Default model for quick actions (translate/explain/summarize/etc.)
+        this.frame.postMessage({ action: 'RESTORE_QUICK_ACTION_MODEL', payload: this.data.geminiQuickActionModel || 'gemini-2.5-flash' });
         
         this.frame.postMessage({ action: 'RESTORE_TEXT_SELECTION', payload: this.data.geminiTextSelectionEnabled !== false });
         this.frame.postMessage({ action: 'RESTORE_IMAGE_TOOLS', payload: this.data.geminiImageToolsEnabled !== false });

@@ -1,4 +1,3 @@
-
 // sandbox/core/i18n.js
 
 export const translations = {
@@ -54,6 +53,8 @@ export const translations = {
         "textSelectionDesc": "Show floating toolbar when selecting text.",
         "imageToolsToggle": "Show Image Tools Button",
         "imageToolsToggleDesc": "Show the AI button when hovering over images.",
+        "quickActionModel": "Quick Action Model",
+        "quickActionModelDesc": "Default model used for translate/explain/summarize shortcuts.",
         "sidebarBehavior": "When Sidebar Reopens",
         "sidebarBehaviorAuto": "Auto restore or restart",
         "sidebarBehaviorAutoDesc": "Restore if opened within 10 mins, otherwise start new chat.",
@@ -74,13 +75,12 @@ export const translations = {
         "shortcutBrowserControl": "Open Browser Control",
         "resetDefault": "Reset Default",
         "saveChanges": "Save Changes",
-        "system": "System",
+        "system": "System Default",
         "debugLogs": "Debug Logs",
         "downloadLogs": "Download Logs",
         "about": "About",
         "sourceCode": "Source Code",
         "buyMeCoffee": "Buy Me a Coffee",
-        "system": "System Default",
         "light": "Light",
         "dark": "Dark",
         "pageContextActive": "Chat with page is already active",
@@ -180,6 +180,8 @@ export const translations = {
         "textSelectionDesc": "选中网页文本时显示悬浮工具栏。",
         "imageToolsToggle": "显示图片工具按钮",
         "imageToolsToggleDesc": "鼠标悬停在图片上时显示 AI 按钮。",
+        "quickActionModel": "快捷功能默认模型",
+        "quickActionModelDesc": "翻译/解释/总结等快捷功能默认使用的模型。",
         "sidebarBehavior": "当侧边栏重新打开时",
         "sidebarBehaviorAuto": "自动恢复或重新开始",
         "sidebarBehaviorAutoDesc": "如果在10分钟内重新打开，聊天将恢复；如果超过10分钟，将开始新的聊天",
@@ -200,13 +202,12 @@ export const translations = {
         "shortcutBrowserControl": "打开浏览器控制",
         "resetDefault": "恢复默认",
         "saveChanges": "保存更改",
-        "system": "系统",
+        "system": "跟随系统",
         "debugLogs": "调试日志",
         "downloadLogs": "下载日志",
         "about": "关于",
         "sourceCode": "源代码",
         "buyMeCoffee": "请我喝咖啡",
-        "system": "跟随系统",
         "light": "浅色",
         "dark": "深色",
         "pageContextActive": "网页对话已激活",
@@ -310,3 +311,4 @@ export function applyTranslations() {
         if (text) el.title = text;
     });
 }
+

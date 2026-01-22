@@ -41,12 +41,12 @@ export class ConnectionSection {
         this.elements = {
             providerSelect: get('provider-select'),
             apiKeyContainer: get('api-key-container'),
-            
+
             // Official Fields
             officialFields: get('official-fields'),
             apiKeyInput: get('api-key-input'),
             thinkingLevelSelect: get('thinking-level-select'),
-            
+
             // OpenAI Fields
             openaiFields: get('openai-fields'),
             openaiBaseUrl: get('openai-base-url'),
@@ -72,14 +72,74 @@ export class ConnectionSection {
             mcpToolSearch: get('mcp-tool-search'),
             mcpToolsSummary: get('mcp-tools-summary'),
             mcpToolList: get('mcp-tool-list'),
+
+            // Custom dropdown elements
+            providerDropdown: get('provider-dropdown'),
+            providerTrigger: get('provider-dropdown-trigger'),
+            providerMenu: get('provider-dropdown-menu'),
+
+            thinkingLevelDropdown: get('thinking-level-dropdown'),
+            thinkingLevelTrigger: get('thinking-level-trigger'),
+            thinkingLevelMenu: get('thinking-level-menu'),
+
+            mcpServerDropdown: get('mcp-server-dropdown'),
+            mcpServerTrigger: get('mcp-server-trigger'),
+            mcpServerMenu: get('mcp-server-menu'),
+
+            mcpTransportDropdown: get('mcp-transport-dropdown'),
+            mcpTransportTrigger: get('mcp-transport-trigger'),
+            mcpTransportMenu: get('mcp-transport-menu'),
+
+            mcpToolModeDropdown: get('mcp-tool-mode-dropdown'),
+            mcpToolModeTrigger: get('mcp-tool-mode-trigger'),
+            mcpToolModeMenu: get('mcp-tool-mode-menu'),
         };
     }
 
     bindEvents() {
-        const { providerSelect } = this.elements;
-        if (providerSelect) {
-            providerSelect.addEventListener('change', (e) => {
-                this.updateVisibility(e.target.value);
+        const {
+            providerDropdown, providerTrigger, providerMenu,
+            thinkingLevelDropdown, thinkingLevelTrigger, thinkingLevelMenu,
+            mcpServerDropdown, mcpServerTrigger, mcpServerMenu,
+            mcpTransportDropdown, mcpTransportTrigger, mcpTransportMenu,
+            mcpToolModeDropdown, mcpToolModeTrigger, mcpToolModeMenu
+        } = this.elements;
+
+        // Provider dropdown
+        if (providerTrigger) {
+            providerTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this._toggleDropdown('provider');
+            });
+        }
+        if (providerMenu) {
+            providerMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const item = e.target.closest('.settings-dropdown-item');
+                if (item) {
+                    const value = item.dataset.value;
+                    this._selectDropdownItem('provider', value);
+                    this.updateVisibility(value);
+                }
+            });
+        }
+
+        // Thinking level dropdown
+        if (thinkingLevelTrigger) {
+            thinkingLevelTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this._toggleDropdown('thinkingLevel');
+            });
+        }
+        if (thinkingLevelMenu) {
+            thinkingLevelMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const item = e.target.closest('.settings-dropdown-item');
+                if (item) {
+                    this._selectDropdownItem('thinkingLevel', item.dataset.value);
+                }
             });
         }
 
@@ -90,31 +150,111 @@ export class ConnectionSection {
             });
         }
 
-        const {
-            mcpServerSelect,
-            mcpAddServer,
-            mcpRemoveServer,
-            mcpServerName,
-            mcpTransport,
-            mcpServerUrl,
-            mcpServerEnabled,
-            mcpTestConnection,
-            mcpToolMode,
-            mcpRefreshTools,
-            mcpEnableAllTools,
-            mcpDisableAllTools,
-            mcpToolSearch
-        } = this.elements;
-
-        if (mcpServerSelect) {
-            mcpServerSelect.addEventListener('change', (e) => {
-                this._saveCurrentServerEdits();
-                this.mcpActiveServerId = e.target.value;
-                this._loadActiveServerIntoForm();
-                this._renderMcpServerOptions();
-                this.setMcpTestStatus('');
+        // MCP Server dropdown
+        if (mcpServerTrigger) {
+            mcpServerTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this._toggleDropdown('mcpServer');
             });
         }
+        if (mcpServerMenu) {
+            mcpServerMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const item = e.target.closest('.settings-dropdown-item');
+                if (item) {
+                    this._saveCurrentServerEdits();
+                    this.mcpActiveServerId = item.dataset.value;
+                    this._selectDropdownItem('mcpServer', item.dataset.value);
+                    this._loadActiveServerIntoForm();
+                    this._renderMcpServerOptions();
+                    this.setMcpTestStatus('');
+                }
+            });
+        }
+
+        // MCP Transport dropdown
+        if (mcpTransportTrigger) {
+            mcpTransportTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this._toggleDropdown('mcpTransport');
+            });
+        }
+        if (mcpTransportMenu) {
+            mcpTransportMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const item = e.target.closest('.settings-dropdown-item');
+                if (item) {
+                    const server = this._getActiveServer();
+                    const prevTransport = server ? (server.transport || 'sse') : 'sse';
+                    const nextTransport = item.dataset.value || 'sse';
+
+                    this._selectDropdownItem('mcpTransport', nextTransport);
+
+                    // Update placeholder to match transport
+                    const { mcpServerUrl } = this.elements;
+                    if (mcpServerUrl) {
+                        mcpServerUrl.placeholder = this._getDefaultUrlForTransport(nextTransport);
+                    }
+
+                    // If URL is empty OR still equal to the previous transport default, swap to new default
+                    if (server && mcpServerUrl) {
+                        const currentUrl = (mcpServerUrl.value || '').trim();
+                        const prevDefault = this._getDefaultUrlForTransport(prevTransport);
+                        if (!currentUrl || currentUrl === prevDefault) {
+                            mcpServerUrl.value = this._getDefaultUrlForTransport(nextTransport);
+                        }
+                    }
+
+                    this._saveCurrentServerEdits();
+                    this._renderMcpServerOptions();
+                }
+            });
+        }
+
+        // MCP Tool Mode dropdown
+        if (mcpToolModeTrigger) {
+            mcpToolModeTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this._toggleDropdown('mcpToolMode');
+            });
+        }
+        if (mcpToolModeMenu) {
+            mcpToolModeMenu.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const item = e.target.closest('.settings-dropdown-item');
+                if (item) {
+                    this._selectDropdownItem('mcpToolMode', item.dataset.value);
+                    this._saveCurrentServerEdits();
+                    this._renderToolsUI();
+                }
+            });
+        }
+
+        // Close all dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (providerDropdown && !providerDropdown.contains(e.target)) {
+                this._toggleDropdown('provider', true);
+            }
+            if (thinkingLevelDropdown && !thinkingLevelDropdown.contains(e.target)) {
+                this._toggleDropdown('thinkingLevel', true);
+            }
+            if (mcpServerDropdown && !mcpServerDropdown.contains(e.target)) {
+                this._toggleDropdown('mcpServer', true);
+            }
+            if (mcpTransportDropdown && !mcpTransportDropdown.contains(e.target)) {
+                this._toggleDropdown('mcpTransport', true);
+            }
+            if (mcpToolModeDropdown && !mcpToolModeDropdown.contains(e.target)) {
+                this._toggleDropdown('mcpToolMode', true);
+            }
+        });
+
+        const { mcpAddServer, mcpRemoveServer, mcpServerName, mcpServerUrl,
+                mcpServerEnabled, mcpTestConnection, mcpRefreshTools,
+                mcpEnableAllTools, mcpDisableAllTools, mcpToolSearch } = this.elements;
 
         if (mcpAddServer) {
             mcpAddServer.addEventListener('click', () => {
@@ -156,37 +296,7 @@ export class ConnectionSection {
 
         if (mcpServerName) mcpServerName.addEventListener('input', onEdit);
         if (mcpServerUrl) mcpServerUrl.addEventListener('input', onEdit);
-        if (mcpTransport) {
-            mcpTransport.addEventListener('change', () => {
-                const server = this._getActiveServer();
-                const prevTransport = server ? (server.transport || 'sse') : 'sse';
-                const nextTransport = mcpTransport.value || 'sse';
-
-                // Update placeholder to match transport.
-                if (mcpServerUrl) {
-                    mcpServerUrl.placeholder = this._getDefaultUrlForTransport(nextTransport);
-                }
-
-                // If URL is empty OR still equal to the previous transport default, swap to new default.
-                if (server && mcpServerUrl) {
-                    const currentUrl = (mcpServerUrl.value || '').trim();
-                    const prevDefault = this._getDefaultUrlForTransport(prevTransport);
-                    if (!currentUrl || currentUrl === prevDefault) {
-                        mcpServerUrl.value = this._getDefaultUrlForTransport(nextTransport);
-                    }
-                }
-
-                onEdit();
-            });
-        }
         if (mcpServerEnabled) mcpServerEnabled.addEventListener('change', onEdit);
-
-        if (mcpToolMode) {
-            mcpToolMode.addEventListener('change', () => {
-                this._saveCurrentServerEdits();
-                this._renderToolsUI();
-            });
-        }
 
         if (mcpToolSearch) {
             mcpToolSearch.addEventListener('input', () => {
@@ -251,22 +361,81 @@ export class ConnectionSection {
         }
     }
 
+    _toggleDropdown(type, forceClose = false) {
+        const dropdownMap = {
+            provider: this.elements.providerDropdown,
+            thinkingLevel: this.elements.thinkingLevelDropdown,
+            mcpServer: this.elements.mcpServerDropdown,
+            mcpTransport: this.elements.mcpTransportDropdown,
+            mcpToolMode: this.elements.mcpToolModeDropdown
+        };
+        const dropdown = dropdownMap[type];
+        if (!dropdown) return;
+
+        if (forceClose) {
+            dropdown.classList.remove('open');
+        } else {
+            dropdown.classList.toggle('open');
+        }
+    }
+
+    _selectDropdownItem(type, value) {
+        const config = {
+            provider: { dropdown: this.elements.providerDropdown, trigger: this.elements.providerTrigger, menu: this.elements.providerMenu },
+            thinkingLevel: { dropdown: this.elements.thinkingLevelDropdown, trigger: this.elements.thinkingLevelTrigger, menu: this.elements.thinkingLevelMenu },
+            mcpServer: { dropdown: this.elements.mcpServerDropdown, trigger: this.elements.mcpServerTrigger, menu: this.elements.mcpServerMenu },
+            mcpTransport: { dropdown: this.elements.mcpTransportDropdown, trigger: this.elements.mcpTransportTrigger, menu: this.elements.mcpTransportMenu },
+            mcpToolMode: { dropdown: this.elements.mcpToolModeDropdown, trigger: this.elements.mcpToolModeTrigger, menu: this.elements.mcpToolModeMenu }
+        };
+        const { dropdown, trigger, menu } = config[type] || {};
+        if (!dropdown || !menu) return;
+
+        const items = menu.querySelectorAll('.settings-dropdown-item');
+        const triggerText = trigger ? trigger.querySelector('.dropdown-text') : null;
+
+        items.forEach(item => {
+            if (item.dataset.value === value) {
+                item.classList.add('selected');
+                if (triggerText) {
+                    const textEl = item.querySelector('.item-text');
+                    if (textEl) triggerText.textContent = textEl.textContent;
+                }
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+
+        this._toggleDropdown(type, true);
+    }
+
+    _getDropdownValue(type) {
+        const menuMap = {
+            provider: this.elements.providerMenu,
+            thinkingLevel: this.elements.thinkingLevelMenu,
+            mcpServer: this.elements.mcpServerMenu,
+            mcpTransport: this.elements.mcpTransportMenu,
+            mcpToolMode: this.elements.mcpToolModeMenu
+        };
+        const menu = menuMap[type];
+        if (!menu) return null;
+        const selected = menu.querySelector('.settings-dropdown-item.selected');
+        return selected ? selected.dataset.value : null;
+    }
+
     setData(data) {
-        const { 
-            providerSelect, apiKeyInput, thinkingLevelSelect, 
+        const {
+            apiKeyInput,
             openaiBaseUrl, openaiApiKey, openaiModel,
             mcpEnabled
         } = this.elements;
 
         // Provider
-        if (providerSelect) {
-            providerSelect.value = data.provider || 'web';
-            this.updateVisibility(data.provider || 'web');
-        }
-        
+        this._selectDropdownItem('provider', data.provider || 'web');
+        this.updateVisibility(data.provider || 'web');
+
         // Official
         if (apiKeyInput) apiKeyInput.value = data.apiKey || "";
-        if (thinkingLevelSelect) thinkingLevelSelect.value = data.thinkingLevel || "low";
+        this._selectDropdownItem('thinkingLevel', data.thinkingLevel || 'low');
         
         // OpenAI
         if (openaiBaseUrl) openaiBaseUrl.value = data.openaiBaseUrl || "";
@@ -313,7 +482,7 @@ export class ConnectionSection {
 
     getData() {
         const {
-            providerSelect, apiKeyInput, thinkingLevelSelect,
+            apiKeyInput,
             openaiBaseUrl, openaiApiKey, openaiModel,
             mcpEnabled
         } = this.elements;
@@ -324,10 +493,10 @@ export class ConnectionSection {
         const firstEnabled = servers.find(s => s.enabled !== false && s.url && s.url.trim());
 
         return {
-            provider: providerSelect ? providerSelect.value : 'web',
+            provider: this._getDropdownValue('provider') || 'web',
             // Official
             apiKey: apiKeyInput ? apiKeyInput.value.trim() : "",
-            thinkingLevel: thinkingLevelSelect ? thinkingLevelSelect.value : "low",
+            thinkingLevel: this._getDropdownValue('thinkingLevel') || "low",
             // OpenAI
             openaiBaseUrl: openaiBaseUrl ? openaiBaseUrl.value.trim() : "",
             openaiApiKey: openaiApiKey ? openaiApiKey.value.trim() : "",
@@ -379,10 +548,8 @@ export class ConnectionSection {
     _saveCurrentServerEdits() {
         const {
             mcpServerName,
-            mcpTransport,
             mcpServerUrl,
-            mcpServerEnabled,
-            mcpToolMode
+            mcpServerEnabled
         } = this.elements;
 
         const server = this._getActiveServer();
@@ -391,10 +558,10 @@ export class ConnectionSection {
         const prevKey = this._serverKey(server);
 
         if (mcpServerName) server.name = mcpServerName.value || '';
-        if (mcpTransport) server.transport = mcpTransport.value || 'sse';
+        server.transport = this._getDropdownValue('mcpTransport') || 'sse';
         if (mcpServerUrl) server.url = (mcpServerUrl.value || '').trim();
         if (mcpServerEnabled) server.enabled = mcpServerEnabled.checked === true;
-        if (mcpToolMode) server.toolMode = mcpToolMode.value === 'selected' ? 'selected' : 'all';
+        server.toolMode = this._getDropdownValue('mcpToolMode') === 'selected' ? 'selected' : 'all';
 
         // If transport/url changed, invalidate cached tool list for this server.
         const nextKey = this._serverKey(server);
@@ -405,49 +572,55 @@ export class ConnectionSection {
 
     _loadActiveServerIntoForm() {
         const {
-            mcpServerSelect,
             mcpServerName,
-            mcpTransport,
             mcpServerUrl,
-            mcpServerEnabled,
-            mcpToolMode
+            mcpServerEnabled
         } = this.elements;
 
         const server = this._getActiveServer();
         if (!server) return;
 
-        if (mcpServerSelect) mcpServerSelect.value = server.id;
+        this._selectDropdownItem('mcpServer', server.id);
         if (mcpServerName) mcpServerName.value = server.name || '';
-        if (mcpTransport) mcpTransport.value = server.transport || 'sse';
+        this._selectDropdownItem('mcpTransport', server.transport || 'sse');
         if (mcpServerUrl) mcpServerUrl.value = server.url || '';
         if (mcpServerUrl) mcpServerUrl.placeholder = this._getDefaultUrlForTransport(server.transport || 'sse');
         if (mcpServerEnabled) mcpServerEnabled.checked = server.enabled !== false;
-        if (mcpToolMode) mcpToolMode.value = server.toolMode === 'selected' ? 'selected' : 'all';
+        this._selectDropdownItem('mcpToolMode', server.toolMode === 'selected' ? 'selected' : 'all');
 
         this._renderToolsUI();
     }
 
     _renderMcpServerOptions() {
-        const { mcpServerSelect } = this.elements;
-        if (!mcpServerSelect) return;
+        const { mcpServerMenu, mcpServerTrigger } = this.elements;
+        if (!mcpServerMenu) return;
 
         const active = this._getActiveServer();
         if (active) this.mcpActiveServerId = active.id;
 
-        mcpServerSelect.innerHTML = '';
+        mcpServerMenu.innerHTML = '';
+        const triggerText = mcpServerTrigger ? mcpServerTrigger.querySelector('.dropdown-text') : null;
+
         for (const server of this.mcpServers) {
-            const opt = document.createElement('option');
-            opt.value = server.id;
+            const item = document.createElement('div');
+            item.className = 'settings-dropdown-item';
+            item.dataset.value = server.id;
 
             const name = (server.name || '').trim();
             const label = name || (server.url || 'MCP Server');
-            // Show enabled status with checkmark or cross
             const status = server.enabled === false ? '✗' : '✓';
-            opt.textContent = `${status} ${label}`;
-            mcpServerSelect.appendChild(opt);
-        }
 
-        if (active) mcpServerSelect.value = active.id;
+            if (active && server.id === active.id) {
+                item.classList.add('selected');
+                if (triggerText) triggerText.textContent = `${status} ${label}`;
+            }
+
+            item.innerHTML = `
+                <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                <span class="item-text">${status} ${label}</span>
+            `;
+            mcpServerMenu.appendChild(item);
+        }
     }
 
     setMcpTestStatus(text, isError = false) {
