@@ -118,21 +118,25 @@
         
         async syncSettings() {
             const result = await chrome.storage.local.get([
-                'geminiModel', 
+                'geminiModel',
                 'geminiQuickActionModel',
-                'geminiProvider', 
-                'geminiUseOfficialApi', 
+                'geminiProvider',
+                'geminiUseOfficialApi',
                 'geminiOpenaiModel'
             ]);
-            
+
             const settings = {
                 provider: result.geminiProvider,
                 useOfficialApi: result.geminiUseOfficialApi,
                 openaiModel: result.geminiOpenaiModel
             };
-            
+
+            // Prefer current UI selection if valid, otherwise fall back to stored model
+            const currentUIModel = this.ui.getSelectedModel();
+            const modelToUse = currentUIModel || result.geminiModel;
+
             // Update UI options and selection
-            this.ui.updateModelList(settings, result.geminiModel);
+            this.ui.updateModelList(settings, modelToUse);
         }
         
         setSelectionEnabled(enabled) {

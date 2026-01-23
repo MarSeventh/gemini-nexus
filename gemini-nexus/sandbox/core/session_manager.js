@@ -8,18 +8,28 @@ export class SessionManager {
         this.currentSessionId = null;
     }
 
-    createSession() {
+    createSession(model = null) {
         const newId = generateUUID();
         const newSession = {
             id: newId,
             title: "New Chat",
             timestamp: Date.now(),
             messages: [],
-            context: null // Gemini context IDs
+            context: null, // Gemini context IDs
+            model: model // Store the model used for this session
         };
         this.sessions.unshift(newSession); // Add to top
         this.currentSessionId = newId;
         return newSession;
+    }
+
+    updateModel(id, model) {
+        const session = this.sessions.find(s => s.id === id);
+        if (session) {
+            session.model = model;
+            return true;
+        }
+        return false;
     }
 
     setSessions(sessions) {

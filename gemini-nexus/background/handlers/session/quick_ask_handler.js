@@ -19,10 +19,11 @@ export class QuickAskHandler {
             await this.sessionManager.ensureInitialized();
         }
 
-        // Quick actions should use the configured default model.
-        const storage = await chrome.storage.local.get(['geminiQuickActionModel']);
-        const quickModel = storage.geminiQuickActionModel || 'gemini-2.5-flash';
-        request.model = quickModel;
+        // Use provided model from request, otherwise fall back to configured quick action model
+        if (!request.model) {
+            const storage = await chrome.storage.local.get(['geminiQuickActionModel']);
+            request.model = storage.geminiQuickActionModel || 'gemini-2.5-flash';
+        }
 
         const onUpdate = (partialText, partialThoughts) => {
             if (tabId) {
@@ -67,12 +68,16 @@ export class QuickAskHandler {
             return;
         }
 
-        const storage = await chrome.storage.local.get(['geminiQuickActionModel']);
-        const quickModel = storage.geminiQuickActionModel || 'gemini-2.5-flash';
+        // Use provided model from request, otherwise fall back to configured quick action model
+        let model = request.model;
+        if (!model) {
+            const storage = await chrome.storage.local.get(['geminiQuickActionModel']);
+            model = storage.geminiQuickActionModel || 'gemini-2.5-flash';
+        }
 
         const promptRequest = {
             text: request.text,
-            model: quickModel,
+            model: model,
             files: [{
                 base64: imgRes.base64,
                 type: imgRes.type,

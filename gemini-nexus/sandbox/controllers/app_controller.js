@@ -116,10 +116,29 @@ export class AppController {
     }
     
     getSelectedModel() {
-        return this.ui.modelSelect ? this.ui.modelSelect.value : "gemini-2.5-flash";
+        // Try hidden select first (legacy)
+        if (this.ui.modelSelect && this.ui.modelSelect.value) {
+            return this.ui.modelSelect.value;
+        }
+        // Try custom dropdown
+        const modelMenu = document.getElementById('model-dropdown-menu');
+        if (modelMenu) {
+            const selected = modelMenu.querySelector('.settings-dropdown-item.selected');
+            if (selected && selected.dataset.value) {
+                return selected.dataset.value;
+            }
+        }
+        return "gemini-3-flash";
     }
 
     handleModelChange(model) {
+        // Update current session's model
+        const currentId = this.sessionManager.currentSessionId;
+        if (currentId) {
+            this.sessionManager.updateModel(currentId, model);
+            saveSessionsToStorage(this.sessionManager.sessions);
+        }
+        // Also save as global default
         window.parent.postMessage({ action: 'SAVE_MODEL', payload: model }, '*');
     }
 

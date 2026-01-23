@@ -13,11 +13,12 @@ export class SessionFlowController {
 
     handleNewChat() {
         if (this.app.isGenerating) this.app.prompt.cancel();
-        
+
         this.app.messageHandler.resetStream();
-        
-        const s = this.sessionManager.createSession();
-        s.title = t('newChat'); 
+
+        const currentModel = this.app.getSelectedModel();
+        const s = this.sessionManager.createSession(currentModel);
+        s.title = t('newChat');
         this.switchToSession(s.id);
     }
 
@@ -26,9 +27,14 @@ export class SessionFlowController {
 
         this.app.messageHandler.resetStream();
         this.sessionManager.setCurrentId(sessionId);
-        
+
         const session = this.sessionManager.getCurrentSession();
         if (!session) return;
+
+        // Restore the session's model if it has one
+        if (session.model) {
+            this._selectModel(session.model);
+        }
 
         this.ui.clearChatHistory();
         session.messages.forEach(msg => {
@@ -68,7 +74,7 @@ export class SessionFlowController {
     handleDeleteSession(sessionId) {
         const switchNeeded = this.sessionManager.deleteSession(sessionId);
         saveSessionsToStorage(this.sessionManager.sessions);
-        
+
         if (switchNeeded) {
             if (this.sessionManager.sessions.length > 0) {
                 this.switchToSession(this.sessionManager.currentSessionId);
@@ -77,6 +83,52 @@ export class SessionFlowController {
             }
         } else {
             this.refreshHistoryUI();
+        }
+    }
+
+    _selectModel(value) {
+        // Update custom dropdown UI
+        const modelMenu = document.getElementById('model-dropdown-menu');
+        const modelTrigger = document.getElementById('model-dropdown-trigger');
+
+        if (modelMenu) {
+            const items = modelMenu.querySelectorAll('.settings-dropdown-item');
+            let found = false;
+
+            items.forEach(item => {
+                if (item.dataset.value === value) {
+                    item.classList.add('selected');
+                    found = true;
+                    // Update trigger text
+                    if (modelTrigger) {
+                        const triggerText = modelTrigger.querySelector('.dropdown-text');
+                        if (triggerText) {
+                            triggerText.textContent = item.querySelector('.item-text').textContent;
+                        }
+                    }
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+
+            // Fallback to first item if model not found
+            if (!found && items.length > 0) {
+                items[0].classList.add('selected');
+                if (modelTrigger) {
+                    const triggerText = modelTrigger.querySelector('.dropdown-text');
+                    if (triggerText) {
+                        triggerText.textContent = items[0].querySelector('.item-text').textContent;
+                    }
+                }
+            }
+        }
+
+        // Also update hidden select if it exists (legacy)
+        if (this.ui.modelSelect) {
+            this.ui.modelSelect.value = value;
+            if (this.ui.modelSelect.selectedIndex === -1 && this.ui.modelSelect.options.length > 0) {
+                this.ui.modelSelect.selectedIndex = 0;
+            }
         }
     }
 }
