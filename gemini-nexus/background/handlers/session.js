@@ -38,14 +38,29 @@ export class SessionMessageHandler {
         if (request.action === "SAVE_AND_CONTINUE_CHAT") {
             (async () => {
                 const result = await this.quickAskHandler.handleSaveAndContinue(request, sender);
-                // Open side panel with the new session ID
-                if (result.sessionId && sender.tab) {
+                // Store pending session ID for side panel to pick up
+                if (result.sessionId) {
                     await chrome.storage.local.set({ pendingSessionId: result.sessionId });
                     setTimeout(() => {
                         chrome.storage.local.remove(['pendingSessionId']);
                     }, 5000);
-                    await chrome.sidePanel.open({ tabId: sender.tab.id, windowId: sender.tab.windowId })
-                        .catch(err => console.error("Could not open side panel:", err));
+                }
+                // Note: We cannot call sidePanel.open() here as user gesture is lost
+                // The side panel will detect pendingSessionId when opened manually
+                sendResponse({ status: "completed", sessionId: result.sessionId });
+            })();
+            return true;
+        }
+
+        // --- SAVE PENDING SESSION (without opening side panel) ---
+        if (request.action === "SAVE_PENDING_SESSION") {
+            (async () => {
+                const result = await this.quickAskHandler.handleSaveAndContinue(request, sender);
+                if (result.sessionId) {
+                    await chrome.storage.local.set({ pendingSessionId: result.sessionId });
+                    setTimeout(() => {
+                        chrome.storage.local.remove(['pendingSessionId']);
+                    }, 10000);
                 }
                 sendResponse({ status: "completed", sessionId: result.sessionId });
             })();

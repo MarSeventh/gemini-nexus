@@ -87,21 +87,29 @@
 
         showResult(htmlContent, title, isStreaming = false) {
             if (!this.elements.askWindow) return;
-            
+
             if (title) this.elements.windowTitle.textContent = title;
-            
+
             const resultArea = this.elements.resultArea;
+            const resultText = this.elements.resultText;
             let shouldScrollBottom = false;
-            
+
             // Only auto-scroll to bottom during streaming
             if (resultArea && isStreaming) {
                 const threshold = 50;
                 const distanceToBottom = resultArea.scrollHeight - resultArea.scrollTop - resultArea.clientHeight;
                 shouldScrollBottom = distanceToBottom <= threshold;
             }
-            
+
             // Content is now always HTML rendered via Bridge (using marked/katex/highlight.js)
-            this.elements.resultText.innerHTML = htmlContent;
+            resultText.innerHTML = htmlContent;
+
+            // Toggle streaming class for cursor effect
+            if (isStreaming) {
+                resultText.classList.add('streaming');
+            } else {
+                resultText.classList.remove('streaming');
+            }
 
             // Ensure Footer is visible
             if (this.elements.windowFooter) this.elements.windowFooter.classList.remove('hidden');

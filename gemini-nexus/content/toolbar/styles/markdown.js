@@ -186,5 +186,38 @@
             border-top: 1px solid #e1e3e1;
             margin: 16px 0;
         }
+
+        /* --- Streaming / Typewriter Effect --- */
+
+        .result-text.streaming {
+            /* Enable smooth text appearance */
+        }
+
+        /* Blinking cursor at the end of streaming text */
+        .result-text.streaming::after {
+            content: "";
+            display: inline-block;
+            width: 2px;
+            height: 1.1em;
+            background: #0b57d0;
+            margin-left: 2px;
+            vertical-align: text-bottom;
+            animation: cursor-blink 1s step-end infinite;
+        }
+
+        @keyframes cursor-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Smooth fade-in for new content */
+        .result-text.streaming > * {
+            animation: fade-in 0.15s ease-out;
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
     `;
 })();

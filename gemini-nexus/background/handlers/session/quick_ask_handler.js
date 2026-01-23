@@ -1,6 +1,7 @@
 
 // background/handlers/session/quick_ask_handler.js
 import { saveToHistory } from '../../managers/history_manager.js';
+import { generateUUID } from '../../../lib/utils.js';
 
 export class QuickAskHandler {
     constructor(sessionManager, imageHandler) {
@@ -141,7 +142,6 @@ export class QuickAskHandler {
     async _saveMultiTurnSession(pendingSession) {
         try {
             const { geminiSessions = [] } = await chrome.storage.local.get(['geminiSessions']);
-            const { generateUUID } = await import('../../../lib/utils.js');
 
             const sessionId = generateUUID();
             const firstUserMsg = pendingSession.messages.find(m => m.role === 'user');

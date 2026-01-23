@@ -194,17 +194,33 @@ class ToolbarActions {
     }
 
     handleContinueChat(sessionId, pendingSession = null) {
-        // If we have pending session data, save it first then open sidebar
+        // Due to Chrome's user gesture restrictions, we must try to open side panel first
+        // (synchronously in the user gesture context), then save session data asynchronously.
+        // The side panel will detect pendingSessionId when it initializes.
+
         if (pendingSession) {
+            // First: Save pending session to storage (for side panel to detect)
+            // This is done via a fire-and-forget message
             chrome.runtime.sendMessage({
-                action: "SAVE_AND_CONTINUE_CHAT",
+                action: "SAVE_PENDING_SESSION",
                 pendingSession: pendingSession
             });
+
+            // Second: Immediately try to open side panel (still in user gesture context)
+            // This should work because we haven't awaited anything yet
+            chrome.runtime.sendMessage({
+                action: "OPEN_SIDE_PANEL"
+            });
         } else if (sessionId) {
-            // Legacy: session already saved, just open with sessionId
+            // Session already saved, try to open with sessionId
             chrome.runtime.sendMessage({
                 action: "OPEN_SIDE_PANEL",
                 sessionId: sessionId
+            });
+        } else {
+            // No session data, just try to open side panel
+            chrome.runtime.sendMessage({
+                action: "OPEN_SIDE_PANEL"
             });
         }
     }

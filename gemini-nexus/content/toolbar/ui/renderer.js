@@ -14,33 +14,49 @@
 
         /**
          * Renders the text result and optionally processes generated images.
+         * During streaming, uses lightweight rendering for performance.
+         * Full Markdown rendering only happens when streaming is complete.
          */
         async show(text, title, isStreaming, images = []) {
             this.currentResultText = text;
-            
-            // Delegate rendering to iframe (Offscreen Renderer)
-            // The bridge now handles both Markdown AND Image HTML generation to share logic with Sandbox
+
             let html = text;
             let tasks = [];
 
-            if (this.bridge) {
+            if (isStreaming) {
+                // Lightweight rendering during streaming - skip Bridge for performance
+                // Simple escape with basic formatting
+                html = this._escapeHtml(text);
+            } else if (this.bridge) {
+                // Full Markdown rendering when streaming is complete
                 try {
-                    const result = await this.bridge.render(text, isStreaming ? [] : images);
+                    const result = await this.bridge.render(text, images);
                     html = result.html;
                     tasks = result.fetchTasks || [];
                 } catch (e) {
                     console.warn("Bridge render failed, falling back to simple escape");
-                    html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+                    html = this._escapeHtml(text);
                 }
             }
 
             // Pass to view
             this.view.showResult(html, title, isStreaming);
-                 
+
             // Execute fetch tasks (images) if any
             if (tasks.length > 0) {
                 this._executeImageFetchTasks(tasks);
             }
+        }
+
+        /**
+         * Simple HTML escape for streaming display
+         */
+        _escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\n/g, "<br>");
         }
         
         _executeImageFetchTasks(tasks) {

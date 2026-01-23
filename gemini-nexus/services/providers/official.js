@@ -186,7 +186,7 @@ export async function sendOfficialMessage(prompt, systemInstruction, history, ap
                                 }
                             });
                             
-                            if (fullText || fullThoughts) {
+                            if ((fullText || fullThoughts) && onUpdate) {
                                 onUpdate(fullText, fullThoughts);
                             }
                         }

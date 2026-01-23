@@ -141,14 +141,14 @@ export async function sendOpenAIMessage(prompt, systemInstruction, history, conf
                         // Standard Content
                         if (delta.content) {
                             fullText += delta.content;
-                            onUpdate(fullText, fullThoughts);
+                            if (onUpdate) onUpdate(fullText, fullThoughts);
                         }
-                        
+
                         // Reasoning Content (DeepSeek R1 style or similar extension)
                         // If the API returns reasoning_content, use it as thoughts
                         if (delta.reasoning_content) {
                             fullThoughts += delta.reasoning_content;
-                            onUpdate(fullText, fullThoughts);
+                            if (onUpdate) onUpdate(fullText, fullThoughts);
                         }
                     }
                 } catch (e) {

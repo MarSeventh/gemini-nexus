@@ -86,9 +86,49 @@
                 "Please describe the content of this screenshot in detail.",
 
             // Text Actions
-            textTranslate: (text) => isZh ? 
-                `请将以下文本翻译：\n- 如果是英文，翻译为中文。\n- 如果是中文，翻译为英文。\n- 如果是其他语言，翻译为中文。\n\n仅输出翻译结果，不要包含任何解释：\n\n"${text}"` : 
-                `Translate the following text:\n- If it is English, translate to Chinese.\n- If it is Chinese, translate to English.\n- If it is any other language, translate to Chinese.\n\nOutput ONLY the translation, no explanation:\n\n"${text}"`,
+            textTranslate: (text) => {
+                // Check if input is a single word (no spaces, or simple compound)
+                const trimmed = text.trim();
+                const isSingleWord = /^[\w\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af-]+$/i.test(trimmed) && trimmed.split(/\s+/).length <= 2;
+
+                if (isSingleWord) {
+                    // Dictionary-style prompt for single words
+                    return isZh ?
+                        `请为这个单词/词语提供详细的词典式解释：
+
+"${trimmed}"
+
+请按以下格式输出：
+**${trimmed}**
+- **发音**: [音标或拼音]
+- **词性**: [名词/动词/形容词等]
+- **释义**: [中英互译，列出主要含义]
+- **例句**:
+  1. [例句1] — [翻译]
+  2. [例句2] — [翻译]
+- **近义词**: [如有]
+- **词源/备注**: [简短说明，如有]` :
+                        `Provide a detailed dictionary-style explanation for this word:
+
+"${trimmed}"
+
+Format:
+**${trimmed}**
+- **Pronunciation**: [IPA or phonetic]
+- **Part of Speech**: [noun/verb/adj etc.]
+- **Definition**: [translations and meanings]
+- **Examples**:
+  1. [Example 1] — [Translation]
+  2. [Example 2] — [Translation]
+- **Synonyms**: [if any]
+- **Etymology/Notes**: [brief, if relevant]`;
+                } else {
+                    // Regular translation for sentences/paragraphs
+                    return isZh ?
+                        `请将以下文本翻译：\n- 如果是英文，翻译为中文。\n- 如果是中文，翻译为英文。\n- 如果是其他语言，翻译为中文。\n\n仅输出翻译结果，不要包含任何解释：\n\n"${text}"` :
+                        `Translate the following text:\n- If it is English, translate to Chinese.\n- If it is Chinese, translate to English.\n- If it is any other language, translate to Chinese.\n\nOutput ONLY the translation, no explanation:\n\n"${text}"`;
+                }
+            },
             
             explain: (text) => isZh ? 
                 `用通俗易懂的语言简要解释以下内容：\n\n"${text}"` : 
