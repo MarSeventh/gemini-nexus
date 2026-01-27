@@ -60,6 +60,39 @@ export class AppMessageBridge {
             return;
         }
         if (action === 'RESTORE_MODEL') {
+            // Update custom dropdown menu
+            const modelMenu = document.getElementById('model-dropdown-menu');
+            const modelTrigger = document.getElementById('model-dropdown-trigger');
+
+            if (modelMenu) {
+                const items = modelMenu.querySelectorAll('.settings-dropdown-item');
+                const triggerText = modelTrigger ? modelTrigger.querySelector('.dropdown-text') : null;
+                let found = false;
+
+                items.forEach(item => {
+                    if (item.dataset.value === payload) {
+                        item.classList.add('selected');
+                        if (triggerText) {
+                            const textEl = item.querySelector('.item-text');
+                            if (textEl) triggerText.textContent = textEl.textContent;
+                        }
+                        found = true;
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+
+                // If not found, select first item
+                if (!found && items.length > 0) {
+                    items[0].classList.add('selected');
+                    if (triggerText) {
+                        const textEl = items[0].querySelector('.item-text');
+                        if (textEl) triggerText.textContent = textEl.textContent;
+                    }
+                }
+            }
+
+            // Also update legacy hidden select for compatibility
             if (this.ui.modelSelect) {
                 const prev = this.ui.modelSelect.value;
                 this.ui.modelSelect.value = payload;
@@ -71,7 +104,6 @@ export class AppMessageBridge {
                         this.ui.modelSelect.selectedIndex = 0;
                     }
                 }
-                if (this.resizeFn) this.resizeFn();
             }
             return;
         }

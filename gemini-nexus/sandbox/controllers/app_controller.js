@@ -116,17 +116,17 @@ export class AppController {
     }
     
     getSelectedModel() {
-        // Try hidden select first (legacy)
-        if (this.ui.modelSelect && this.ui.modelSelect.value) {
-            return this.ui.modelSelect.value;
-        }
-        // Try custom dropdown
+        // Try custom dropdown first (this is the actual UI)
         const modelMenu = document.getElementById('model-dropdown-menu');
         if (modelMenu) {
             const selected = modelMenu.querySelector('.settings-dropdown-item.selected');
             if (selected && selected.dataset.value) {
                 return selected.dataset.value;
             }
+        }
+        // Fallback to hidden select (legacy)
+        if (this.ui.modelSelect && this.ui.modelSelect.value) {
+            return this.ui.modelSelect.value;
         }
         return "gemini-3-flash";
     }

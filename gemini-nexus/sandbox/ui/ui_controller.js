@@ -52,15 +52,20 @@ export class UIController {
     // --- DynamicModel List ---
 
     updateModelList(settings) {
-        if (!this.modelSelect) return;
-        
-        const current = this.modelSelect.value;
-        this.modelSelect.innerHTML = '';
-        
+        // Get custom dropdown elements
+        const modelMenu = document.getElementById('model-dropdown-menu');
+        const modelTrigger = document.getElementById('model-dropdown-trigger');
+
+        if (!modelMenu) return;
+
+        // Get current selection before updating
+        const selectedItem = modelMenu.querySelector('.settings-dropdown-item.selected');
+        const current = selectedItem ? selectedItem.dataset.value : null;
+
         // Determine provider. Fallback to 'web' if not set.
         // Legacy support: if provider missing but useOfficialApi is true, assume 'official'.
         const provider = settings.provider || (settings.useOfficialApi ? 'official' : 'web');
-        
+
         let opts = [];
         if (provider === 'official') {
             // Official API Models
@@ -73,7 +78,7 @@ export class UIController {
             const rawModels = settings.openaiModel || "";
             // Split by comma, trim whitespace, remove empty entries
             const models = rawModels.split(',').map(m => m.trim()).filter(m => m);
-            
+
             if (models.length === 0) {
                 opts = [{ val: 'openai_custom', txt: 'Custom Model' }];
             } else {
@@ -87,54 +92,61 @@ export class UIController {
                 { val: 'gemini-3-pro', txt: '3 Pro' }
             ];
         }
-        
+
+        // Clear and rebuild the custom dropdown menu
+        modelMenu.innerHTML = '';
+
         opts.forEach(o => {
-            const opt = document.createElement('option');
-            opt.value = o.val;
-            opt.textContent = o.txt;
-            this.modelSelect.appendChild(opt);
+            const item = document.createElement('div');
+            item.className = 'settings-dropdown-item';
+            item.dataset.value = o.val;
+            item.innerHTML = `
+                <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
+                <span class="item-text">${o.txt}</span>
+            `;
+            modelMenu.appendChild(item);
         });
-        
-        // Restore selection if valid, else default
+
+        // Restore selection if valid, else default to first option
         const match = opts.find(o => o.val === current);
-        if (match) {
-            this.modelSelect.value = current;
-        } else {
-            // Default to first option
-            if (opts.length > 0) {
-                this.modelSelect.value = opts[0].val;
-            }
-            // Dispatch change to update app state
-            this.modelSelect.dispatchEvent(new Event('change'));
+        const selectedValue = match ? current : (opts.length > 0 ? opts[0].val : null);
+
+        if (selectedValue) {
+            this._selectModelDropdownItem(selectedValue, modelMenu, modelTrigger);
         }
-        
-        this._resizeModelSelect();
+
+        // Also update legacy hidden select for compatibility
+        if (this.modelSelect) {
+            this.modelSelect.innerHTML = '';
+            opts.forEach(o => {
+                const opt = document.createElement('option');
+                opt.value = o.val;
+                opt.textContent = o.txt;
+                this.modelSelect.appendChild(opt);
+            });
+            if (selectedValue) {
+                this.modelSelect.value = selectedValue;
+            }
+        }
     }
 
-    _resizeModelSelect() {
-        const select = this.modelSelect;
-        if (!select) return;
-        
-        // Safety check for empty or invalid selection
-        if (select.selectedIndex === -1) {
-            if (select.options.length > 0) select.selectedIndex = 0;
-            else return; // Should not happen if options exist
-        }
+    _selectModelDropdownItem(value, menu, trigger) {
+        if (!menu) return;
 
-        const tempSpan = document.createElement('span');
-        Object.assign(tempSpan.style, {
-            visibility: 'hidden',
-            position: 'absolute',
-            fontSize: '13px',
-            fontWeight: '500',
-            fontFamily: window.getComputedStyle(select).fontFamily,
-            whiteSpace: 'nowrap'
+        const items = menu.querySelectorAll('.settings-dropdown-item');
+        const triggerText = trigger ? trigger.querySelector('.dropdown-text') : null;
+
+        items.forEach(item => {
+            if (item.dataset.value === value) {
+                item.classList.add('selected');
+                if (triggerText) {
+                    const textEl = item.querySelector('.item-text');
+                    if (textEl) triggerText.textContent = textEl.textContent;
+                }
+            } else {
+                item.classList.remove('selected');
+            }
         });
-        tempSpan.textContent = select.options[select.selectedIndex].text;
-        document.body.appendChild(tempSpan);
-        const width = tempSpan.getBoundingClientRect().width;
-        document.body.removeChild(tempSpan);
-        select.style.width = `${width + 34}px`;
     }
 
     // --- Delegation Methods ---
